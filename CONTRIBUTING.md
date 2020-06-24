@@ -4,8 +4,7 @@ We're happy you're considering contributing to the WriteFreely Swift package!
 
 It won't take long to get up to speed on this. Here are our development resources:
 
-* We do our project management in [Phabricator](https://phabricator.write.as/tag/project_tag/).
-* We accept and respond to bugs here on [GitHub](https://github.com/writeas/project_name/issues).
+* We accept and respond to bugs here on [GitHub](https://github.com/writeas/writefreely-swift/issues).
 * We're usually in #writeas on freenode, but if not, find us on our [Slack channel](http://slack.write.as).
 
 ## Testing
@@ -14,7 +13,7 @@ We try to write tests for all public methods in the package, but aren't there ye
 
 ## Submitting changes
 
-Please send a [pull request](https://github.com/writeas/project_name/compare) with a clear list of what you've done.
+Please send a [pull request](https://github.com/writeas/writefreely-swift/compare) with a clear list of what you've done.
 
 Please follow our coding conventions below and make sure all of your commits are atomic. Larger changes should have commits with more detailed information on what changed, any impact on existing code, rationales, etc.
 
