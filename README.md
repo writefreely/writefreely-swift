@@ -9,8 +9,6 @@ These instructions will get you a copy of the project up and running on your loc
 ## TODO
 
 - Add a test suite
-- Add project metadocuments (LICENSE, CONTRIBUTING, &cet.)
-- Add code documentation comments to methods
 - Extend for use with [Write.as](https://write.as) (e.g., add `modifyToken` handling for unauthenticated post manipulation)
 - Improve `movePost(id: with modifyToken: to collectionAlias: completion:)` to return `Result<[Post], Error>`
 
