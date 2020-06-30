@@ -2,7 +2,9 @@
 
 We're happy you're considering contributing to the WriteFreely Swift package!
 
-It won't take long to get up to speed on this. Here are our development resources:
+Before making a contribution, please be sure to familiarize yourself with our contributor's [code of conduct](CODE_OF_CONDUCT.md).
+
+Otherwise, it won't take long to get up to speed on this. Here are our development resources:
 
 * We accept and respond to bugs here on [GitHub](https://github.com/writeas/writefreely-swift/issues).
 * We're usually in #writeas on freenode, but if not, find us on our [Slack channel](http://slack.write.as).
