@@ -107,7 +107,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 201 CREATED, return the Collection as success; if not, return a WriteasError as failure.
+                // If we get a 201 CREATED, return the Collection as success; if not, return a WFError as failure.
                 if response.statusCode == 201 {
                     do {
                         let collection = try self.decoder.decode(ServerData<Collection>.self, from: data)
@@ -117,8 +117,8 @@ public class WFClient {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -159,7 +159,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
                         let collection = try self.decoder.decode(ServerData<Collection>.self, from: data)
@@ -169,8 +169,8 @@ public class WFClient {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -217,9 +217,9 @@ public class WFClient {
                         do {
                             _ = try result.get()
                             completion(.failure(error))
-                        } catch WriteFreelyError.notFound {
+                        } catch WFError.notFound {
                             completion(.success(true))
-                        } catch WriteFreelyError.unauthorized {
+                        } catch WFError.unauthorized {
                             completion(.success(true))
                         } catch {
                             completion(.failure(error))
@@ -232,10 +232,10 @@ public class WFClient {
 
             if let response = response as? HTTPURLResponse {
                 // We got a response. If it's a 204 NO CONTENT, return true as success;
-                // if not, return a WriteasError as failure.
+                // if not, return a WFError as failure.
                 if response.statusCode != 204 {
                     guard let data = data else { return }
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 } else {
                     completion(.success(true))
@@ -291,7 +291,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
                         // The response is formatted differently depending on if we're getting user posts or collection
@@ -308,8 +308,8 @@ public class WFClient {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError.
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError.
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -378,12 +378,12 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return true as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return true as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     completion(.success(true))
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -452,12 +452,12 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     completion(.success(true))
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -513,12 +513,12 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     completion(.success(true))
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -591,7 +591,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the Post as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the Post as success; if not, return a WFError as failure.
                 if response.statusCode == 201 {
                     do {
                         let post = try self.decoder.decode(ServerData<Post>.self, from: data)
@@ -601,8 +601,8 @@ public class WFClient {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -642,7 +642,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
                         let post = try self.decoder.decode(ServerData<Post>.self, from: data)
@@ -652,8 +652,8 @@ public class WFClient {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -699,7 +699,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
                         let post = try self.decoder.decode(ServerData<Post>.self, from: data)
@@ -709,8 +709,8 @@ public class WFClient {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -772,7 +772,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the Post as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the Post as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
                         let post = try self.decoder.decode(ServerData<Post>.self, from: data)
@@ -782,8 +782,8 @@ public class WFClient {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -833,11 +833,11 @@ public class WFClient {
                         do {
                             _ = try result.get()
                             completion(.failure(error))
-                        } catch WriteFreelyError.notFound {
+                        } catch WFError.notFound {
                             completion(.success(true))
-                        } catch WriteFreelyError.unauthorized {
+                        } catch WFError.unauthorized {
                             completion(.success(true))
-                        } catch WriteFreelyError.internalServerError {
+                        } catch WFError.internalServerError {
                             // If you try to delete a non-existent post, the API returns a 500 Internal Server Error.
                             completion(.success(true))
                         } catch {
@@ -851,10 +851,10 @@ public class WFClient {
 
             if let response = response as? HTTPURLResponse {
                 // We got a response. If it's a 204 NO CONTENT, return true as success;
-                // if not, return a WriteasError as failure.
+                // if not, return a WFError as failure.
                 if response.statusCode != 204 {
                     guard let data = data else { return }
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 } else {
                     completion(.success(true))
@@ -913,7 +913,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
                         let user = try self.decoder.decode(User.self, from: data)
@@ -923,8 +923,8 @@ public class WFClient {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -965,10 +965,10 @@ public class WFClient {
                         do {
                             _ = try result.get()
                             completion(.failure(error))
-                        } catch WriteFreelyError.notFound {
+                        } catch WFError.notFound {
                             self.user = nil
                             completion(.success(true))
-                        } catch WriteFreelyError.unauthorized {
+                        } catch WFError.unauthorized {
                             self.user = nil
                             completion(.success(true))
                         } catch {
@@ -982,10 +982,10 @@ public class WFClient {
 
             if let response = response as? HTTPURLResponse {
                 // We got a response. If it's a 204 NO CONTENT, return true as success;
-                // if not, return a WriteasError as failure.
+                // if not, return a WFError as failure.
                 if response.statusCode != 204 {
                     guard let data = data else { return }
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 } else {
                     self.user = nil
@@ -1022,12 +1022,12 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     completion(.success(data))
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError.
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError.
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -1061,7 +1061,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
                         let collection = try self.decoder.decode(ServerData<[Collection]>.self, from: data)
@@ -1070,8 +1070,8 @@ public class WFClient {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError.
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError.
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -1082,11 +1082,11 @@ public class WFClient {
 }
 
 private extension WFClient {
-    func translateWriteFreelyError(fromServerResponse response: Data) -> WriteFreelyError? {
+    func translateWFError(fromServerResponse response: Data) -> WFError? {
         do {
             let error = try self.decoder.decode(ErrorMessage.self, from: response)
             print("⛔️ \(error.message)")
-            return WriteFreelyError(rawValue: error.code)
+            return WFError(rawValue: error.code)
         } catch {
             return nil
         }
