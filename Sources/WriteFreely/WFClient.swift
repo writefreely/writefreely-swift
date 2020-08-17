@@ -63,12 +63,12 @@ public class WFClient {
     ///   - token: The access token for the user creating the collection.
     ///   - title: The title of the new collection.
     ///   - alias: The alias of the collection.
-    ///   - completion: A handler for the returned `Collection` on success, or `Error` on failure.
+    ///   - completion: A handler for the returned `WFCollection` on success, or `Error` on failure.
     public func createCollection(
         token: String? = nil,
         withTitle title: String,
         alias: String? = nil,
-        completion: @escaping (Result<Collection, Error>) -> Void
+        completion: @escaping (Result<WFCollection, Error>) -> Void
     ) {
         if token == nil && user == nil { return }
         guard let tokenToVerify = token ?? user?.token else { return }
@@ -107,10 +107,10 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 201 CREATED, return the Collection as success; if not, return a WFError as failure.
+                // If we get a 201 CREATED, return the WFCollection as success; if not, return a WFError as failure.
                 if response.statusCode == 201 {
                     do {
-                        let collection = try self.decoder.decode(ServerData<Collection>.self, from: data)
+                        let collection = try self.decoder.decode(ServerData<WFCollection>.self, from: data)
 
                         completion(.success(collection.data))
                     } catch {
@@ -135,11 +135,11 @@ public class WFClient {
     /// - Parameters:
     ///   - token: The access token for the user retrieving the collection.
     ///   - alias: The alias for the collection to be retrieved.
-    ///   - completion: A handler for the returned `Collection` on success, or `Error` on failure.
+    ///   - completion: A handler for the returned `WFCollection` on success, or `Error` on failure.
     public func getCollection(
         token: String? = nil,
         withAlias alias: String,
-        completion: @escaping (Result<Collection, Error>) -> Void
+        completion: @escaping (Result<WFCollection, Error>) -> Void
     ) {
         if token == nil && user == nil { return }
         guard let tokenToVerify = token ?? user?.token else { return }
@@ -162,7 +162,7 @@ public class WFClient {
                 // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
-                        let collection = try self.decoder.decode(ServerData<Collection>.self, from: data)
+                        let collection = try self.decoder.decode(ServerData<WFCollection>.self, from: data)
 
                         completion(.success(collection.data))
                     } catch {
@@ -1040,8 +1040,8 @@ public class WFClient {
     ///
     /// - Parameters:
     ///   - token: The access token for the user whose collections are to be retrieved.
-    ///   - completion: A handler for the `[Collection]` object returned on success, or `Error` on failure.
-    public func getUserCollections(token: String? = nil, completion: @escaping (Result<[Collection], Error>) -> Void) {
+    ///   - completion: A handler for the `[WFCollection]` object returned on success, or `Error` on failure.
+    public func getUserCollections(token: String? = nil, completion: @escaping (Result<[WFCollection], Error>) -> Void) {
         if token == nil && user == nil { return }
 
         guard let tokenToVerify = token ?? user?.token else { return }
@@ -1064,7 +1064,7 @@ public class WFClient {
                 // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
-                        let collection = try self.decoder.decode(ServerData<[Collection]>.self, from: data)
+                        let collection = try self.decoder.decode(ServerData<[WFCollection]>.self, from: data)
                         completion(.success(collection.data))
                     } catch {
                         completion(.failure(error))
