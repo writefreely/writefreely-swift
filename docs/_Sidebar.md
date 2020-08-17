@@ -1,9 +1,9 @@
 <details>
 <summary>Types</summary>
 
-  - [Collection](/Collection)
-  - [Post](/Post)
-  - [User](/User)
-  - [WriteFreelyClient](/WriteFreelyClient)
+  - [WFClient](/WFClient)
+  - [WFCollection](/WFCollection)
+  - [WFPost](/WFPost)
+  - [WFUser](/WFUser)
 
 </details>

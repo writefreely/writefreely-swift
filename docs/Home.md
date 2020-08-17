@@ -1,6 +1,6 @@
 # Types
 
-  - [Collection](/Collection)
-  - [Post](/Post)
-  - [User](/User)
-  - [WriteFreelyClient](/WriteFreelyClient)
+  - [WFClient](/WFClient)
+  - [WFCollection](/WFCollection)
+  - [WFPost](/WFPost)
+  - [WFUser](/WFUser)

@@ -1,7 +1,7 @@
-# User
+# WFUser
 
 ``` swift
-public struct User
+public struct WFUser
 ```
 
 ## Inheritance
@@ -12,13 +12,13 @@ public struct User
 
 ### `init(from:)`
 
-Creates a `User` object from the server response.
+Creates a `WFUser` object from the server response.
 
 ``` swift
 public init(from decoder: Decoder) throws
 ```
 
-Primarily used by the `WriteFreelyClient` to create a `User` object from the JSON returned by the server.
+Primarily used by the `WFClient` to create a `WFUser` object from the JSON returned by the server.
 
 #### Parameters
 

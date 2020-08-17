@@ -1,14 +1,14 @@
-# WriteFreelyClient
+# WFClient
 
 ``` swift
-public class WriteFreelyClient
+public class WFClient
 ```
 
 ## Initializers
 
 ### `init(for:)`
 
-Initializes the WriteFreelyClient.
+Initializes the WriteFreely client.
 
 ``` swift
 public init(for instanceURL: URL)
@@ -37,7 +37,7 @@ var requestURL: URL
 ### `user`
 
 ``` swift
-var user: User?
+var user: WFUser?
 ```
 
 ## Methods
@@ -47,7 +47,7 @@ var user: User?
 Creates a new collection.
 
 ``` swift
-public func createCollection(token: String? = nil, withTitle title: String, alias: String? = nil, completion: @escaping (Result<Collection, Error>) -> Void)
+public func createCollection(token: String? = nil, withTitle title: String, alias: String? = nil, completion: @escaping (Result<WFCollection, Error>) -> Void)
 ```
 
 If only a `title` is given, the server will generate and return an alias; in this case, clients should store
@@ -58,14 +58,14 @@ the returned `alias` for future operations.
   - token: - token: The access token for the user creating the collection.
   - title: - title: The title of the new collection.
   - alias: - alias: The alias of the collection.
-  - completion: - completion: A handler for the returned `Collection` on success, or `Error` on failure.
+  - completion: - completion: A handler for the returned `WFCollection` on success, or `Error` on failure.
 
 ### `getCollection(token:withAlias:completion:)`
 
 Retrieves a collection's metadata.
 
 ``` swift
-public func getCollection(token: String? = nil, withAlias alias: String, completion: @escaping (Result<Collection, Error>) -> Void)
+public func getCollection(token: String? = nil, withAlias alias: String, completion: @escaping (Result<WFCollection, Error>) -> Void)
 ```
 
 Collections can be retrieved without authentication. However, authentication is required for retrieving a
@@ -75,7 +75,7 @@ private collection or one with scheduled posts.
 
   - token: - token: The access token for the user retrieving the collection.
   - alias: - alias: The alias for the collection to be retrieved.
-  - completion: - completion: A handler for the returned `Collection` on success, or `Error` on failure.
+  - completion: - completion: A handler for the returned `WFCollection` on success, or `Error` on failure.
 
 ### `deleteCollection(token:withAlias:completion:)`
 
@@ -98,7 +98,7 @@ Any posts in the collection are not deleted; rather, they are made anonymous.
 Retrieves an array of posts.
 
 ``` swift
-public func getPosts(token: String? = nil, in collectionAlias: String? = nil, completion: @escaping (Result<[Post], Error>) -> Void)
+public func getPosts(token: String? = nil, in collectionAlias: String? = nil, completion: @escaping (Result<[WFPost], Error>) -> Void)
 ```
 
 If the `collectionAlias` argument is provided, an array of all posts in that collection is retrieved; if
@@ -111,7 +111,7 @@ private collection or one with scheduled posts.
 
   - token: - token: The access token for the user retrieving the posts.
   - collectionAlias: - collectionAlias: The alias for the collection whose posts are to be retrieved.
-  - completion: - completion: A handler for the returned `[Post]` on success, or `Error` on failure.
+  - completion: - completion: A handler for the returned `[WFPost]` on success, or `Error` on failure.
 
 ### `movePost(token:postId:with:to:completion:)`
 
@@ -121,7 +121,7 @@ Moves a post to a collection.
 public func movePost(token: String? = nil, postId: String, with modifyToken: String? = nil, to collectionAlias: String, completion: @escaping (Result<Bool, Error>) -> Void)
 ```
 
-> Attention:   - The closure should return a result type of \`\<\[Post\], Error\>\`.
+> Attention:   - The closure should return a result type of \`\<\[WFPost\], Error\>\`.
 >   - The modifyToken for the post is currently ignored.
 >   
 
@@ -176,7 +176,7 @@ array of posts, this function only accepts a single post.
 Creates a new post.
 
 ``` swift
-public func createPost(token: String? = nil, post: Post, in collectionAlias: String? = nil, completion: @escaping (Result<Post, Error>) -> Void)
+public func createPost(token: String? = nil, post: WFPost, in collectionAlias: String? = nil, completion: @escaping (Result<WFPost, Error>) -> Void)
 ```
 
 Creates a new post. If a `collectionAlias` is provided, the post is published to that collection; otherwise, it
@@ -185,52 +185,52 @@ is posted to the user's Drafts.
 #### Parameters
 
   - token: - token: The access token of the user creating the post.
-  - post: - post: The `Post` object to be published.
+  - post: - post: The `WFPost` object to be published.
   - collectionAlias: - collectionAlias: The collection to which the post should be published.
-  - completion: - completion: A handler for the `Post` object returned on success, or `Error` on failure.
+  - completion: - completion: A handler for the `WFPost` object returned on success, or `Error` on failure.
 
 ### `getPost(token:byId:completion:)`
 
 Retrieves a post.
 
 ``` swift
-public func getPost(token: String? = nil, byId postId: String, completion: @escaping (Result<Post, Error>) -> Void)
+public func getPost(token: String? = nil, byId postId: String, completion: @escaping (Result<WFPost, Error>) -> Void)
 ```
 
-The `Post` object returned may include additional data, including page views and extracted tags.
+The `WFPost` object returned may include additional data, including page views and extracted tags.
 
 #### Parameters
 
   - token: - token: The access token of the user retrieving the post.
   - postId: - postId: The ID of the post to be retrieved.
-  - completion: - completion: A handler for the `Post` object returned on success, or `Error` on failure.
+  - completion: - completion: A handler for the `WFPost` object returned on success, or `Error` on failure.
 
 ### `getPost(token:bySlug:from:completion:)`
 
 Retrieves a post from a collection.
 
 ``` swift
-public func getPost(token: String? = nil, bySlug slug: String, from collectionAlias: String, completion: @escaping (Result<Post, Error>) -> Void)
+public func getPost(token: String? = nil, bySlug slug: String, from collectionAlias: String, completion: @escaping (Result<WFPost, Error>) -> Void)
 ```
 
 Collection posts can be retrieved without authentication. However, authentication is required for retrieving a
 post from a private collection.
 
-The `Post` object returned may include additional data, including page views and extracted tags.
+The `WFPost` object returned may include additional data, including page views and extracted tags.
 
 #### Parameters
 
   - token: - token: The access token of the user retrieving the post.
   - slug: - slug: The slug of the post to be retrieved.
   - collectionAlias: - collectionAlias: The alias of the collection from which the post should be retrieved.
-  - completion: - completion: A handler for the `Post` object returned on success, or `Error` on failure.
+  - completion: - completion: A handler for the `WFPost` object returned on success, or `Error` on failure.
 
 ### `updatePost(token:postId:updatedPost:with:completion:)`
 
 Updates an existing post.
 
 ``` swift
-public func updatePost(token: String? = nil, postId: String, updatedPost: Post, with modifyToken: String? = nil, completion: @escaping (Result<Post, Error>) -> Void)
+public func updatePost(token: String? = nil, postId: String, updatedPost: WFPost, with modifyToken: String? = nil, completion: @escaping (Result<WFPost, Error>) -> Void)
 ```
 
 Note that if the `updatedPost` object is provided without a title, the original post's title will be removed.
@@ -242,9 +242,9 @@ Note that if the `updatedPost` object is provided without a title, the original 
 
   - token: - token: The access token for the user updating the post.
   - postId: - postId: The ID of the post to be updated.
-  - updatedPost: - updatedPost: The `Post` object with which to update the existing post.
+  - updatedPost: - updatedPost: The `WFPost` object with which to update the existing post.
   - modifyToken: - modifyToken: The post's modify token; required if the post doesn't belong to the requesting user.
-  - completion: - completion: A handler for the `Post` object returned on success, or `Error` on failure.
+  - completion: - completion: A handler for the `WFPost` object returned on success, or `Error` on failure.
 
 ### `deletePost(token:postId:with:completion:)`
 
@@ -269,10 +269,10 @@ public func deletePost(token: String? = nil, postId: String, with modifyToken: S
 Logs the user in to their account on the WriteFreely instance.
 
 ``` swift
-public func login(username: String, password: String, completion: @escaping (Result<User, Error>) -> Void)
+public func login(username: String, password: String, completion: @escaping (Result<WFUser, Error>) -> Void)
 ```
 
-On successful login, the `WriteFreelyClient`'s `user` property is set to the returned `User` object; this allows
+On successful login, the `WFClient`'s `user` property is set to the returned `WFUser` object; this allows
 authenticated requests to be made without having to provide an access token.
 
 It is otherwise not necessary to login the user if their access token is provided to the calling function.
@@ -281,7 +281,7 @@ It is otherwise not necessary to login the user if their access token is provide
 
   - username: - username: The user's username.
   - password: - password: The user's password.
-  - completion: - completion: A handler for the `User` object returned on success, or `Error` on failure.
+  - completion: - completion: A handler for the `WFUser` object returned on success, or `Error` on failure.
 
 ### `logout(token:completion:)`
 
@@ -314,16 +314,16 @@ public func getUserData(token: String? = nil, completion: @escaping (Result<Data
 Retrieves a user's collections.
 
 ``` swift
-public func getUserCollections(token: String? = nil, completion: @escaping (Result<[Collection], Error>) -> Void)
+public func getUserCollections(token: String? = nil, completion: @escaping (Result<[WFCollection], Error>) -> Void)
 ```
 
 #### Parameters
 
   - token: - token: The access token for the user whose collections are to be retrieved.
-  - completion: - completion: A handler for the `[Collection]` object returned on success, or `Error` on failure.
+  - completion: - completion: A handler for the `[WFCollection]` object returned on success, or `Error` on failure.
 
-### `translateWriteFreelyError(fromServerResponse:)`
+### `translateWFError(fromServerResponse:)`
 
 ``` swift
-func translateWriteFreelyError(fromServerResponse response: Data) -> WriteFreelyError?
+func translateWFError(fromServerResponse response: Data) -> WFError?
 ```
