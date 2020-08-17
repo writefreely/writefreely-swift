@@ -39,7 +39,7 @@ public class WFClient {
     let decoder = JSONDecoder()
 
     public var requestURL: URL
-    public var user: User?
+    public var user: WFUser?
 
     /// Initializes the WriteFreely client.
     ///
@@ -159,7 +159,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
                         let collection = try self.decoder.decode(ServerData<Collection>.self, from: data)
@@ -291,7 +291,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
                         // The response is formatted differently depending on if we're getting user posts or collection
@@ -452,7 +452,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     completion(.success(true))
                 } else {
@@ -513,7 +513,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     completion(.success(true))
                 } else {
@@ -642,7 +642,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
                         let post = try self.decoder.decode(ServerData<Post>.self, from: data)
@@ -699,7 +699,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
                         let post = try self.decoder.decode(ServerData<Post>.self, from: data)
@@ -877,7 +877,7 @@ public class WFClient {
 
     /// Logs the user in to their account on the WriteFreely instance.
     ///
-    /// On successful login, the `WFClient`'s `user` property is set to the returned `User` object; this allows
+    /// On successful login, the `WFClient`'s `user` property is set to the returned `WFUser` object; this allows
     /// authenticated requests to be made without having to provide an access token.
     ///
     /// It is otherwise not necessary to login the user if their access token is provided to the calling function.
@@ -885,8 +885,8 @@ public class WFClient {
     /// - Parameters:
     ///   - username: The user's username.
     ///   - password: The user's password.
-    ///   - completion: A handler for the `User` object returned on success, or `Error` on failure.
-    public func login(username: String, password: String, completion: @escaping (Result<User, Error>) -> Void) {
+    ///   - completion: A handler for the `WFUser` object returned on success, or `Error` on failure.
+    public func login(username: String, password: String, completion: @escaping (Result<WFUser, Error>) -> Void) {
         guard let url = URL(string: "auth/login", relativeTo: requestURL) else { return }
         var request = URLRequest(url: url)
 
@@ -913,10 +913,10 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
-                        let user = try self.decoder.decode(User.self, from: data)
+                        let user = try self.decoder.decode(WFUser.self, from: data)
                         self.user = user
                         completion(.success(user))
                     } catch {
@@ -1022,7 +1022,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     completion(.success(data))
                 } else {
@@ -1061,7 +1061,7 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WFError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
                         let collection = try self.decoder.decode(ServerData<[Collection]>.self, from: data)
