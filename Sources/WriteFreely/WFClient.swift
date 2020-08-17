@@ -29,10 +29,10 @@ struct NestedPostsJson: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let postsContainer = try container.nestedContainer(keyedBy: CodingKeys.PostKeys.self, forKey: .data)
-        data = try postsContainer.decode([Post].self, forKey: .posts)
+        data = try postsContainer.decode([WFPost].self, forKey: .posts)
     }
 
-    let data: [Post]
+    let data: [WFPost]
 }
 
 public class WFClient {
@@ -259,11 +259,11 @@ public class WFClient {
     /// - Parameters:
     ///   - token: The access token for the user retrieving the posts.
     ///   - collectionAlias: The alias for the collection whose posts are to be retrieved.
-    ///   - completion: A handler for the returned `[Post]` on success, or `Error` on failure.
+    ///   - completion: A handler for the returned `[WFPost]` on success, or `Error` on failure.
     public func getPosts(
         token: String? = nil,
         in collectionAlias: String? = nil,
-        completion: @escaping (Result<[Post], Error>) -> Void
+        completion: @escaping (Result<[WFPost], Error>) -> Void
     ) {
         if token == nil && user == nil { return }
 
@@ -301,7 +301,7 @@ public class WFClient {
                             let post = try self.decoder.decode(NestedPostsJson.self, from: data)
                             completion(.success(post.data))
                         } else {
-                            let post = try self.decoder.decode(ServerData<[Post]>.self, from: data)
+                            let post = try self.decoder.decode(ServerData<[WFPost]>.self, from: data)
                             completion(.success(post.data))
                         }
                     } catch {
@@ -321,7 +321,7 @@ public class WFClient {
     /// Moves a post to a collection.
     ///
     /// - Attention: ⚠️ **INCOMPLETE IMPLEMENTATION** ⚠️
-    ///     - The closure should return a result type of `<[Post], Error>`.
+    ///     - The closure should return a result type of `<[WFPost], Error>`.
     ///     - The modifyToken for the post is currently ignored.
     ///
     /// - Parameters:
@@ -534,14 +534,14 @@ public class WFClient {
     ///
     /// - Parameters:
     ///   - token: The access token of the user creating the post.
-    ///   - post: The `Post` object to be published.
+    ///   - post: The `WFPost` object to be published.
     ///   - collectionAlias: The collection to which the post should be published.
-    ///   - completion: A handler for the `Post` object returned on success, or `Error` on failure.
+    ///   - completion: A handler for the `WFPost` object returned on success, or `Error` on failure.
     public func createPost(
         token: String? = nil,
-        post: Post,
+        post: WFPost,
         in collectionAlias: String? = nil,
-        completion: @escaping (Result<Post, Error>) -> Void
+        completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
         if token == nil && user == nil { return }
         guard let tokenToVerify = token ?? user?.token else { return }
@@ -591,10 +591,10 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the Post as success; if not, return a WFError as failure.
+                // If we get a 200 OK, return the WFPost as success; if not, return a WFError as failure.
                 if response.statusCode == 201 {
                     do {
-                        let post = try self.decoder.decode(ServerData<Post>.self, from: data)
+                        let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
 
                         completion(.success(post.data))
                     } catch {
@@ -613,16 +613,16 @@ public class WFClient {
 
     /// Retrieves a post.
     ///
-    /// The `Post` object returned may include additional data, including page views and extracted tags.
+    /// The `WFPost` object returned may include additional data, including page views and extracted tags.
     ///
     /// - Parameters:
     ///   - token: The access token of the user retrieving the post.
     ///   - postId: The ID of the post to be retrieved.
-    ///   - completion: A handler for the `Post` object returned on success, or `Error` on failure.
+    ///   - completion: A handler for the `WFPost` object returned on success, or `Error` on failure.
     public func getPost(
         token: String? = nil,
         byId postId: String,
-        completion: @escaping (Result<Post, Error>) -> Void
+        completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
         if token == nil && user == nil { return }
         guard let tokenToVerify = token ?? user?.token else { return }
@@ -645,7 +645,7 @@ public class WFClient {
                 // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
-                        let post = try self.decoder.decode(ServerData<Post>.self, from: data)
+                        let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
 
                         completion(.success(post.data))
                     } catch {
@@ -667,18 +667,18 @@ public class WFClient {
     /// Collection posts can be retrieved without authentication. However, authentication is required for retrieving a
     /// post from a private collection.
     ///
-    /// The `Post` object returned may include additional data, including page views and extracted tags.
+    /// The `WFPost` object returned may include additional data, including page views and extracted tags.
     ///
     /// - Parameters:
     ///   - token: The access token of the user retrieving the post.
     ///   - slug: The slug of the post to be retrieved.
     ///   - collectionAlias: The alias of the collection from which the post should be retrieved.
-    ///   - completion: A handler for the `Post` object returned on success, or `Error` on failure.
+    ///   - completion: A handler for the `WFPost` object returned on success, or `Error` on failure.
     public func getPost(
         token: String? = nil,
         bySlug slug: String,
         from collectionAlias: String,
-        completion: @escaping (Result<Post, Error>) -> Void
+        completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
         if token == nil && user == nil { return }
         guard let tokenToVerify = token ?? user?.token else { return }
@@ -702,7 +702,7 @@ public class WFClient {
                 // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
-                        let post = try self.decoder.decode(ServerData<Post>.self, from: data)
+                        let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
 
                         completion(.success(post.data))
                     } catch {
@@ -729,15 +729,15 @@ public class WFClient {
     /// - Parameters:
     ///   - token: The access token for the user updating the post.
     ///   - postId: The ID of the post to be updated.
-    ///   - updatedPost: The `Post` object with which to update the existing post.
+    ///   - updatedPost: The `WFPost` object with which to update the existing post.
     ///   - modifyToken: The post's modify token; required if the post doesn't belong to the requesting user.
-    ///   - completion: A handler for the `Post` object returned on success, or `Error` on failure.
+    ///   - completion: A handler for the `WFPost` object returned on success, or `Error` on failure.
     public func updatePost(
         token: String? = nil,
         postId: String,
-        updatedPost: Post,
+        updatedPost: WFPost,
         with modifyToken: String? = nil,
-        completion: @escaping (Result<Post, Error>) -> Void
+        completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
         if token == nil && user == nil { return }
         guard let tokenToVerify = token ?? user?.token else { return }
@@ -772,10 +772,10 @@ public class WFClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the Post as success; if not, return a WFError as failure.
+                // If we get a 200 OK, return the WFPost as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
-                        let post = try self.decoder.decode(ServerData<Post>.self, from: data)
+                        let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
 
                         completion(.success(post.data))
                     } catch {
