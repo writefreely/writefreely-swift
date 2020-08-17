@@ -29,19 +29,19 @@ struct NestedPostsJson: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let postsContainer = try container.nestedContainer(keyedBy: CodingKeys.PostKeys.self, forKey: .data)
-        data = try postsContainer.decode([Post].self, forKey: .posts)
+        data = try postsContainer.decode([WFPost].self, forKey: .posts)
     }
 
-    let data: [Post]
+    let data: [WFPost]
 }
 
-public class WriteFreelyClient {
+public class WFClient {
     let decoder = JSONDecoder()
 
     public var requestURL: URL
-    public var user: User?
+    public var user: WFUser?
 
-    /// Initializes the WriteFreelyClient.
+    /// Initializes the WriteFreely client.
     ///
     /// Required for connecting to the API endpoints of a WriteFreely instance.
     ///
@@ -63,12 +63,12 @@ public class WriteFreelyClient {
     ///   - token: The access token for the user creating the collection.
     ///   - title: The title of the new collection.
     ///   - alias: The alias of the collection.
-    ///   - completion: A handler for the returned `Collection` on success, or `Error` on failure.
+    ///   - completion: A handler for the returned `WFCollection` on success, or `Error` on failure.
     public func createCollection(
         token: String? = nil,
         withTitle title: String,
         alias: String? = nil,
-        completion: @escaping (Result<Collection, Error>) -> Void
+        completion: @escaping (Result<WFCollection, Error>) -> Void
     ) {
         if token == nil && user == nil { return }
         guard let tokenToVerify = token ?? user?.token else { return }
@@ -107,18 +107,18 @@ public class WriteFreelyClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 201 CREATED, return the Collection as success; if not, return a WriteasError as failure.
+                // If we get a 201 CREATED, return the WFCollection as success; if not, return a WFError as failure.
                 if response.statusCode == 201 {
                     do {
-                        let collection = try self.decoder.decode(ServerData<Collection>.self, from: data)
+                        let collection = try self.decoder.decode(ServerData<WFCollection>.self, from: data)
 
                         completion(.success(collection.data))
                     } catch {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -135,11 +135,11 @@ public class WriteFreelyClient {
     /// - Parameters:
     ///   - token: The access token for the user retrieving the collection.
     ///   - alias: The alias for the collection to be retrieved.
-    ///   - completion: A handler for the returned `Collection` on success, or `Error` on failure.
+    ///   - completion: A handler for the returned `WFCollection` on success, or `Error` on failure.
     public func getCollection(
         token: String? = nil,
         withAlias alias: String,
-        completion: @escaping (Result<Collection, Error>) -> Void
+        completion: @escaping (Result<WFCollection, Error>) -> Void
     ) {
         if token == nil && user == nil { return }
         guard let tokenToVerify = token ?? user?.token else { return }
@@ -159,18 +159,18 @@ public class WriteFreelyClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
-                        let collection = try self.decoder.decode(ServerData<Collection>.self, from: data)
+                        let collection = try self.decoder.decode(ServerData<WFCollection>.self, from: data)
 
                         completion(.success(collection.data))
                     } catch {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -217,9 +217,9 @@ public class WriteFreelyClient {
                         do {
                             _ = try result.get()
                             completion(.failure(error))
-                        } catch WriteFreelyError.notFound {
+                        } catch WFError.notFound {
                             completion(.success(true))
-                        } catch WriteFreelyError.unauthorized {
+                        } catch WFError.unauthorized {
                             completion(.success(true))
                         } catch {
                             completion(.failure(error))
@@ -232,10 +232,10 @@ public class WriteFreelyClient {
 
             if let response = response as? HTTPURLResponse {
                 // We got a response. If it's a 204 NO CONTENT, return true as success;
-                // if not, return a WriteasError as failure.
+                // if not, return a WFError as failure.
                 if response.statusCode != 204 {
                     guard let data = data else { return }
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 } else {
                     completion(.success(true))
@@ -259,11 +259,11 @@ public class WriteFreelyClient {
     /// - Parameters:
     ///   - token: The access token for the user retrieving the posts.
     ///   - collectionAlias: The alias for the collection whose posts are to be retrieved.
-    ///   - completion: A handler for the returned `[Post]` on success, or `Error` on failure.
+    ///   - completion: A handler for the returned `[WFPost]` on success, or `Error` on failure.
     public func getPosts(
         token: String? = nil,
         in collectionAlias: String? = nil,
-        completion: @escaping (Result<[Post], Error>) -> Void
+        completion: @escaping (Result<[WFPost], Error>) -> Void
     ) {
         if token == nil && user == nil { return }
 
@@ -291,7 +291,7 @@ public class WriteFreelyClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
                         // The response is formatted differently depending on if we're getting user posts or collection
@@ -301,15 +301,15 @@ public class WriteFreelyClient {
                             let post = try self.decoder.decode(NestedPostsJson.self, from: data)
                             completion(.success(post.data))
                         } else {
-                            let post = try self.decoder.decode(ServerData<[Post]>.self, from: data)
+                            let post = try self.decoder.decode(ServerData<[WFPost]>.self, from: data)
                             completion(.success(post.data))
                         }
                     } catch {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError.
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError.
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -321,7 +321,7 @@ public class WriteFreelyClient {
     /// Moves a post to a collection.
     ///
     /// - Attention: ⚠️ **INCOMPLETE IMPLEMENTATION** ⚠️
-    ///     - The closure should return a result type of `<[Post], Error>`.
+    ///     - The closure should return a result type of `<[WFPost], Error>`.
     ///     - The modifyToken for the post is currently ignored.
     ///
     /// - Parameters:
@@ -378,12 +378,12 @@ public class WriteFreelyClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return true as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return true as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     completion(.success(true))
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -452,12 +452,12 @@ public class WriteFreelyClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     completion(.success(true))
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -513,12 +513,12 @@ public class WriteFreelyClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     completion(.success(true))
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -534,14 +534,14 @@ public class WriteFreelyClient {
     ///
     /// - Parameters:
     ///   - token: The access token of the user creating the post.
-    ///   - post: The `Post` object to be published.
+    ///   - post: The `WFPost` object to be published.
     ///   - collectionAlias: The collection to which the post should be published.
-    ///   - completion: A handler for the `Post` object returned on success, or `Error` on failure.
+    ///   - completion: A handler for the `WFPost` object returned on success, or `Error` on failure.
     public func createPost(
         token: String? = nil,
-        post: Post,
+        post: WFPost,
         in collectionAlias: String? = nil,
-        completion: @escaping (Result<Post, Error>) -> Void
+        completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
         if token == nil && user == nil { return }
         guard let tokenToVerify = token ?? user?.token else { return }
@@ -591,18 +591,18 @@ public class WriteFreelyClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the Post as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the WFPost as success; if not, return a WFError as failure.
                 if response.statusCode == 201 {
                     do {
-                        let post = try self.decoder.decode(ServerData<Post>.self, from: data)
+                        let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
 
                         completion(.success(post.data))
                     } catch {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -613,16 +613,16 @@ public class WriteFreelyClient {
 
     /// Retrieves a post.
     ///
-    /// The `Post` object returned may include additional data, including page views and extracted tags.
+    /// The `WFPost` object returned may include additional data, including page views and extracted tags.
     ///
     /// - Parameters:
     ///   - token: The access token of the user retrieving the post.
     ///   - postId: The ID of the post to be retrieved.
-    ///   - completion: A handler for the `Post` object returned on success, or `Error` on failure.
+    ///   - completion: A handler for the `WFPost` object returned on success, or `Error` on failure.
     public func getPost(
         token: String? = nil,
         byId postId: String,
-        completion: @escaping (Result<Post, Error>) -> Void
+        completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
         if token == nil && user == nil { return }
         guard let tokenToVerify = token ?? user?.token else { return }
@@ -642,18 +642,18 @@ public class WriteFreelyClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
-                        let post = try self.decoder.decode(ServerData<Post>.self, from: data)
+                        let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
 
                         completion(.success(post.data))
                     } catch {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -667,18 +667,18 @@ public class WriteFreelyClient {
     /// Collection posts can be retrieved without authentication. However, authentication is required for retrieving a
     /// post from a private collection.
     ///
-    /// The `Post` object returned may include additional data, including page views and extracted tags.
+    /// The `WFPost` object returned may include additional data, including page views and extracted tags.
     ///
     /// - Parameters:
     ///   - token: The access token of the user retrieving the post.
     ///   - slug: The slug of the post to be retrieved.
     ///   - collectionAlias: The alias of the collection from which the post should be retrieved.
-    ///   - completion: A handler for the `Post` object returned on success, or `Error` on failure.
+    ///   - completion: A handler for the `WFPost` object returned on success, or `Error` on failure.
     public func getPost(
         token: String? = nil,
         bySlug slug: String,
         from collectionAlias: String,
-        completion: @escaping (Result<Post, Error>) -> Void
+        completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
         if token == nil && user == nil { return }
         guard let tokenToVerify = token ?? user?.token else { return }
@@ -699,18 +699,18 @@ public class WriteFreelyClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
-                        let post = try self.decoder.decode(ServerData<Post>.self, from: data)
+                        let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
 
                         completion(.success(post.data))
                     } catch {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -729,15 +729,15 @@ public class WriteFreelyClient {
     /// - Parameters:
     ///   - token: The access token for the user updating the post.
     ///   - postId: The ID of the post to be updated.
-    ///   - updatedPost: The `Post` object with which to update the existing post.
+    ///   - updatedPost: The `WFPost` object with which to update the existing post.
     ///   - modifyToken: The post's modify token; required if the post doesn't belong to the requesting user.
-    ///   - completion: A handler for the `Post` object returned on success, or `Error` on failure.
+    ///   - completion: A handler for the `WFPost` object returned on success, or `Error` on failure.
     public func updatePost(
         token: String? = nil,
         postId: String,
-        updatedPost: Post,
+        updatedPost: WFPost,
         with modifyToken: String? = nil,
-        completion: @escaping (Result<Post, Error>) -> Void
+        completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
         if token == nil && user == nil { return }
         guard let tokenToVerify = token ?? user?.token else { return }
@@ -772,18 +772,18 @@ public class WriteFreelyClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the Post as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the WFPost as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
-                        let post = try self.decoder.decode(ServerData<Post>.self, from: data)
+                        let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
 
                         completion(.success(post.data))
                     } catch {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -833,11 +833,11 @@ public class WriteFreelyClient {
                         do {
                             _ = try result.get()
                             completion(.failure(error))
-                        } catch WriteFreelyError.notFound {
+                        } catch WFError.notFound {
                             completion(.success(true))
-                        } catch WriteFreelyError.unauthorized {
+                        } catch WFError.unauthorized {
                             completion(.success(true))
-                        } catch WriteFreelyError.internalServerError {
+                        } catch WFError.internalServerError {
                             // If you try to delete a non-existent post, the API returns a 500 Internal Server Error.
                             completion(.success(true))
                         } catch {
@@ -851,10 +851,10 @@ public class WriteFreelyClient {
 
             if let response = response as? HTTPURLResponse {
                 // We got a response. If it's a 204 NO CONTENT, return true as success;
-                // if not, return a WriteasError as failure.
+                // if not, return a WFError as failure.
                 if response.statusCode != 204 {
                     guard let data = data else { return }
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 } else {
                     completion(.success(true))
@@ -877,7 +877,7 @@ public class WriteFreelyClient {
 
     /// Logs the user in to their account on the WriteFreely instance.
     ///
-    /// On successful login, the `WriteFreelyClient`'s `user` property is set to the returned `User` object; this allows
+    /// On successful login, the `WFClient`'s `user` property is set to the returned `WFUser` object; this allows
     /// authenticated requests to be made without having to provide an access token.
     ///
     /// It is otherwise not necessary to login the user if their access token is provided to the calling function.
@@ -885,8 +885,8 @@ public class WriteFreelyClient {
     /// - Parameters:
     ///   - username: The user's username.
     ///   - password: The user's password.
-    ///   - completion: A handler for the `User` object returned on success, or `Error` on failure.
-    public func login(username: String, password: String, completion: @escaping (Result<User, Error>) -> Void) {
+    ///   - completion: A handler for the `WFUser` object returned on success, or `Error` on failure.
+    public func login(username: String, password: String, completion: @escaping (Result<WFUser, Error>) -> Void) {
         guard let url = URL(string: "auth/login", relativeTo: requestURL) else { return }
         var request = URLRequest(url: url)
 
@@ -913,18 +913,18 @@ public class WriteFreelyClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
-                        let user = try self.decoder.decode(User.self, from: data)
+                        let user = try self.decoder.decode(WFUser.self, from: data)
                         self.user = user
                         completion(.success(user))
                     } catch {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -965,10 +965,10 @@ public class WriteFreelyClient {
                         do {
                             _ = try result.get()
                             completion(.failure(error))
-                        } catch WriteFreelyError.notFound {
+                        } catch WFError.notFound {
                             self.user = nil
                             completion(.success(true))
-                        } catch WriteFreelyError.unauthorized {
+                        } catch WFError.unauthorized {
                             self.user = nil
                             completion(.success(true))
                         } catch {
@@ -982,10 +982,10 @@ public class WriteFreelyClient {
 
             if let response = response as? HTTPURLResponse {
                 // We got a response. If it's a 204 NO CONTENT, return true as success;
-                // if not, return a WriteasError as failure.
+                // if not, return a WFError as failure.
                 if response.statusCode != 204 {
                     guard let data = data else { return }
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 } else {
                     self.user = nil
@@ -1022,12 +1022,12 @@ public class WriteFreelyClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     completion(.success(data))
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError.
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError.
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -1040,8 +1040,8 @@ public class WriteFreelyClient {
     ///
     /// - Parameters:
     ///   - token: The access token for the user whose collections are to be retrieved.
-    ///   - completion: A handler for the `[Collection]` object returned on success, or `Error` on failure.
-    public func getUserCollections(token: String? = nil, completion: @escaping (Result<[Collection], Error>) -> Void) {
+    ///   - completion: A handler for the `[WFCollection]` object returned on success, or `Error` on failure.
+    public func getUserCollections(token: String? = nil, completion: @escaping (Result<[WFCollection], Error>) -> Void) {
         if token == nil && user == nil { return }
 
         guard let tokenToVerify = token ?? user?.token else { return }
@@ -1061,17 +1061,17 @@ public class WriteFreelyClient {
             if let response = response as? HTTPURLResponse {
                 guard let data = data else { return }
 
-                // If we get a 200 OK, return the User as success; if not, return a WriteasError as failure.
+                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
                 if response.statusCode == 200 {
                     do {
-                        let collection = try self.decoder.decode(ServerData<[Collection]>.self, from: data)
+                        let collection = try self.decoder.decode(ServerData<[WFCollection]>.self, from: data)
                         completion(.success(collection.data))
                     } catch {
                         completion(.failure(error))
                     }
                 } else {
-                    // We didn't get a 200 OK, so return a WriteasError.
-                    guard let error = self.translateWriteFreelyError(fromServerResponse: data) else { return }
+                    // We didn't get a 200 OK, so return a WFError.
+                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
                     completion(.failure(error))
                 }
             }
@@ -1081,12 +1081,12 @@ public class WriteFreelyClient {
     }
 }
 
-private extension WriteFreelyClient {
-    func translateWriteFreelyError(fromServerResponse response: Data) -> WriteFreelyError? {
+private extension WFClient {
+    func translateWFError(fromServerResponse response: Data) -> WFError? {
         do {
             let error = try self.decoder.decode(ErrorMessage.self, from: response)
             print("⛔️ \(error.message)")
-            return WriteFreelyError(rawValue: error.code)
+            return WFError(rawValue: error.code)
         } catch {
             return nil
         }

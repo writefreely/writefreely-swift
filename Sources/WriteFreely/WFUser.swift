@@ -1,13 +1,13 @@
 import Foundation
 
-public struct User {
+public struct WFUser {
     public var token: String
     public var username: String?
     public var email: String?
     public var createdDate: Date?
 }
 
-extension User: Decodable {
+extension WFUser: Decodable {
     enum RootKeys: String, CodingKey {
         case data
     }
@@ -23,9 +23,9 @@ extension User: Decodable {
         case createdDate = "created"
     }
 
-    /// Creates a `User` object from the server response.
+    /// Creates a `WFUser` object from the server response.
     ///
-    ///  Primarily used by the `WriteFreelyClient` to create a `User` object from the JSON returned by the server.
+    ///  Primarily used by the `WFClient` to create a `WFUser` object from the JSON returned by the server.
     ///
     /// - Parameter decoder: The decoder to use for translating the server response to a Swift object.
     /// - Throws: Error thrown by the `try` attempt when decoding any given property.

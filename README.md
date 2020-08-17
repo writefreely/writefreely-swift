@@ -39,10 +39,10 @@ Once you've done that, just import the library into whichever files should consu
 // The rest of the Swift file goes here
 ```
 
-Use public methods on the `WriteFreelyClient` to send and receive data from the server. The methods leverage completion blocks and the `Result` type, so you'd call them like so:
+Use public methods on the `WFClient` to send and receive data from the server. The methods leverage completion blocks and the `Result` type, so you'd call them like so:
 
 ```swift
-func loginHandler(result: (Result<User, Error>)) {
+func loginHandler(result: (Result<WFUser, Error>)) {
     do {
         let user = try result.get()
         print("Hello, \(user.username)!")
@@ -53,7 +53,7 @@ func loginHandler(result: (Result<User, Error>)) {
 
 
 guard let instanceURL = URL(string: "https://your.writefreely.host/") else { fatalError() }
-let client = WriteFreelyClient(for: instanceURL)
+let client = WFClient(for: instanceURL)
 client.login(username: "username", password: "password", completion: loginHandler)
 ```
 
