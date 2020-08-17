@@ -35,13 +35,13 @@ struct NestedPostsJson: Decodable {
     let data: [Post]
 }
 
-public class WriteFreelyClient {
+public class WFClient {
     let decoder = JSONDecoder()
 
     public var requestURL: URL
     public var user: User?
 
-    /// Initializes the WriteFreelyClient.
+    /// Initializes the WriteFreely client.
     ///
     /// Required for connecting to the API endpoints of a WriteFreely instance.
     ///
@@ -877,7 +877,7 @@ public class WriteFreelyClient {
 
     /// Logs the user in to their account on the WriteFreely instance.
     ///
-    /// On successful login, the `WriteFreelyClient`'s `user` property is set to the returned `User` object; this allows
+    /// On successful login, the `WFClient`'s `user` property is set to the returned `User` object; this allows
     /// authenticated requests to be made without having to provide an access token.
     ///
     /// It is otherwise not necessary to login the user if their access token is provided to the calling function.
@@ -1081,7 +1081,7 @@ public class WriteFreelyClient {
     }
 }
 
-private extension WriteFreelyClient {
+private extension WFClient {
     func translateWriteFreelyError(fromServerResponse response: Data) -> WriteFreelyError? {
         do {
             let error = try self.decoder.decode(ErrorMessage.self, from: response)
