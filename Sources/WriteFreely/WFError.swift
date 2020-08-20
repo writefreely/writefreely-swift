@@ -1,6 +1,6 @@
 import Foundation
 
-enum WFError: Int, Error {
+public enum WFError: Int, Error {
     case badRequest = 400
     case unauthorized = 401
     case forbidden = 403
