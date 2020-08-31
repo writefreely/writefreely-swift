@@ -23,6 +23,19 @@ extension WFUser: Decodable {
         case createdDate = "created"
     }
 
+    /// Creates a minimum `WFUser` object from a stored token.
+    ///
+    /// Use this when the client has already logged in a user and only needs to reconstruct the type from saved properties.
+    ///
+    /// - Parameter token: The user's access token
+    /// - Parameter username: The user's username (optional)
+    public init(token: String, username: String?) {
+        self.token = token
+        if let username = username {
+            self.username = username
+        }
+    }
+
     /// Creates a `WFUser` object from the server response.
     ///
     ///  Primarily used by the `WFClient` to create a `WFUser` object from the JSON returned by the server.
