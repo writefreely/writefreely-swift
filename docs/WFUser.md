@@ -10,6 +10,21 @@ public struct WFUser
 
 ## Initializers
 
+### `init(token:username:)`
+
+Creates a minimum `WFUser` object from a stored token.
+
+``` swift
+public init(token: String, username: String?)
+```
+
+Use this when the client has already logged in a user and only needs to reconstruct the type from saved properties.
+
+#### Parameters
+
+  - token: - token: The user's access token
+  - username: - username: The user's username (optional)
+
 ### `init(from:)`
 
 Creates a `WFUser` object from the server response.
