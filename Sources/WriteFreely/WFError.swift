@@ -12,6 +12,7 @@ public enum WFError: Int, Error {
     case internalServerError = 500
     case badGateway = 502
     case serviceUnavailable = 503
+    case unknownError = -1
 }
 
 struct ErrorMessage: Codable {
