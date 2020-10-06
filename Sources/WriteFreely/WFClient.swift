@@ -924,7 +924,11 @@ public class WFClient {
                     }
                 } else {
                     // We didn't get a 200 OK, so return a WFError
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
+                    guard let error = self.translateWFError(fromServerResponse: data) else {
+                        // We couldn't generate a WFError from the server response data, so return an unknown error.
+                        completion(.failure(WFError.unknownError))
+                        return
+                    }
                     completion(.failure(error))
                 }
             }
@@ -1088,7 +1092,8 @@ private extension WFClient {
             print("⛔️ \(error.message)")
             return WFError(rawValue: error.code)
         } catch {
-            return nil
+            print("⛔️ An unknown error occurred.")
+            return WFError.unknownError
         }
     }
 }
