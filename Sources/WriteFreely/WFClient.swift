@@ -353,20 +353,11 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        var bodyObject: [[String: Any]]
+        var bodyObject: [Any]
         if let modifyToken = modifyToken {
-            bodyObject = [
-                [
-                    "id": postId,
-                    "token": modifyToken
-                ]
-            ]
+            bodyObject = collectionAlias == nil ? [ postId ] : [ [ "id": postId, "token": modifyToken ] ]
         } else {
-            bodyObject = [
-                [
-                    "id": postId
-                ]
-            ]
+            bodyObject = collectionAlias == nil ? [ postId ] : [ [ "id": postId ] ]
         }
 
         do {
