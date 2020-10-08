@@ -327,7 +327,7 @@ public class WFClient {
     /// - Parameters:
     ///   - token: The access token for the user moving the post to a collection.
     ///   - postId: The ID of the post to add to the collection.
-    ///   - modifyToken: The post's modify token; required if the post doesn't belong to the requesting user.
+    ///   - modifyToken: The post's modify token; required if the post doesn't belong to the requesting user. If `collectionAlias` is `nil`, do not include a `modifyToken`.
     ///   - collectionAlias: The alias of the collection to which the post should be added; if `nil`, this removes the post from any collection.
     ///   - completion: A handler for the returned `Bool` on success, or `Error` on failure.
     public func movePost(
@@ -339,6 +339,8 @@ public class WFClient {
     ) {
         if token == nil && user == nil { return }
         guard let tokenToVerify = token ?? user?.token else { return }
+
+        if collectionAlias == nil && modifyToken != nil { completion(.failure(WFError.badRequest)) }
 
         var urlString = ""
         if let collectionAlias = collectionAlias {
@@ -355,7 +357,7 @@ public class WFClient {
 
         var bodyObject: [Any]
         if let modifyToken = modifyToken {
-            bodyObject = collectionAlias == nil ? [ postId ] : [ [ "id": postId, "token": modifyToken ] ]
+            bodyObject = [ [ "id": postId, "token": modifyToken ] ]
         } else {
             bodyObject = collectionAlias == nil ? [ postId ] : [ [ "id": postId ] ]
         }
