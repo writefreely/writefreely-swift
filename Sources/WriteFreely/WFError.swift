@@ -1,6 +1,7 @@
 import Foundation
 
 public enum WFError: Int, Error {
+    // Errors returned by the server
     case badRequest = 400
     case unauthorized = 401
     case forbidden = 403
@@ -12,7 +13,12 @@ public enum WFError: Int, Error {
     case internalServerError = 500
     case badGateway = 502
     case serviceUnavailable = 503
+
+    // Other errors
     case unknownError = -1
+    case couldNotComplete = -2
+    case invalidResponse = -3
+    case invalidData = -4
 }
 
 struct ErrorMessage: Codable {
