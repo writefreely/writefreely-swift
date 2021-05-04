@@ -61,6 +61,8 @@ client.login(username: "username", password: "password", completion: loginHandle
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
+Need help getting started? Find out more about the project's [office hours](https://discuss.write.as/t/office-hours-for-writefreely-swift-projects/2788).
+
 ## Versioning
 
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/writeas/writefreely-swift/tags).
