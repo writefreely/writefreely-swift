@@ -6,12 +6,12 @@ extension WFClient {
     /// - Parameters:
     ///   - request: The `URLRequest` for the `GET` request
     ///   - completion: A closure that captures a `Result` with a `Data` object on success, or a `WFError` on failure.
-    private func get(with request: URLRequest, completion: @escaping (Result<Data, WFError>) -> Void) {
+    func get(with request: URLRequest, completion: @escaping (Result<Data, WFError>) -> Void) {
         if request.httpMethod != "GET" {
             preconditionFailure("Expected GET request, but got \(request.httpMethod ?? "nil")")
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             if error != nil {
                 completion(.failure(.couldNotComplete))
                 return
@@ -41,12 +41,12 @@ extension WFClient {
     /// - Parameters:
     ///   - request: The `URLRequest` for the `POST` request
     ///   - completion: A closure that captures a `Result` with a `Data` object on success, or a `WFError` on failure.
-    private func post(with request: URLRequest, completion: @escaping (Result<Data, WFError>) -> Void) {
+    func post(with request: URLRequest, completion: @escaping (Result<Data, WFError>) -> Void) {
         if request.httpMethod != "POST" {
             preconditionFailure("Expected POST request, but got \(request.httpMethod ?? "nil")")
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             if error != nil {
                 completion(.failure(.couldNotComplete))
                 return
@@ -76,12 +76,12 @@ extension WFClient {
     /// - Parameters:
     ///   - request: The `URLRequest` for the `DELETE` request
     ///   - completion: A closure that captures a `Result` with a `Data` object on success, or a `WFError` on failure.
-    private func delete(with request: URLRequest, completion: @escaping (Result<Data, WFError>) -> Void) {
+    func delete(with request: URLRequest, completion: @escaping (Result<Data, WFError>) -> Void) {
         if request.httpMethod != "DELETE" {
             preconditionFailure("Expected DELETE request, but got \(request.httpMethod ?? "nil")")
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             if error != nil {
                 completion(.failure(.couldNotComplete))
                 return

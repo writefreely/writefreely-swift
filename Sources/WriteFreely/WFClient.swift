@@ -3,20 +3,21 @@ import Foundation
 // MARK: - URLSession-related protocols
 
 /// Define requirements for `URLSession`s here for dependency-injection purposes (specifically, for testing).
-protocol URLSessionProtocol {
+public protocol URLSessionProtocol {
     typealias DataTaskResult = (Data?, URLResponse?, Error?) -> Void
     func dataTask(with request: URLRequest, completionHandler: @escaping DataTaskResult) -> URLSessionDataTaskProtocol
 }
 
 /// Define requirements for `URLSessionDataTask`s here for dependency-injection purposes (specifically, for testing).
-protocol URLSessionDataTaskProtocol {
+public protocol URLSessionDataTaskProtocol {
     func resume()
 }
 
 // MARK: - Class definition
 
 public class WFClient {
-    let decoder = JSONDecoder()
+    let decoder: JSONDecoder
+    let session: URLSessionProtocol
 
     public var requestURL: URL
     public var user: WFUser?
@@ -25,11 +26,17 @@ public class WFClient {
     ///
     /// Required for connecting to the API endpoints of a WriteFreely instance.
     ///
-    /// - Parameter instanceURL: The URL for the WriteFreely instance to which we're connecting, including the protocol.
-    public init(for instanceURL: URL) {
+    /// - Parameters:
+    ///   - instanceURL: The URL for the WriteFreely instance to which we're connecting, including the protocol.
+    ///   - session: The URL session to use for connections; defaults to `URLSession.shared`.
+    public init(for instanceURL: URL, with session: URLSessionProtocol = URLSession.shared) {
+        decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        self.session = session
+
         // TODO: - Check that the protocol for instanceURL is HTTPS
         requestURL = URL(string: "api/", relativeTo: instanceURL) ?? instanceURL
-        decoder.dateDecodingStrategy = .iso8601
     }
 
     // MARK: - Collection-related methods
@@ -78,7 +85,7 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             // Something went wrong; return the error message.
             if let error = error {
                 completion(.failure(error))
@@ -182,7 +189,7 @@ public class WFClient {
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             // Something went wrong; return the error message.
             if let error = error {
                 // ⚠️ HACK: There's something that URLSession doesn't like about 204 NO CONTENT response that the API
@@ -262,7 +269,7 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             // Something went wrong; return the error message.
             if let error = error {
                 completion(.failure(error))
@@ -348,7 +355,7 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             // Something went wrong; return the error message.
             if let error = error {
                 completion(.failure(error))
@@ -422,7 +429,7 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             // Something went wrong; return the error message.
             if let error = error {
                 completion(.failure(error))
@@ -483,7 +490,7 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             // Something went wrong; return the error message.
             if let error = error {
                 completion(.failure(error))
@@ -561,7 +568,7 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             // Something went wrong; return the error message.
             if let error = error {
                 completion(.failure(error))
@@ -612,7 +619,7 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             // Something went wrong; return the error message.
             if let error = error {
                 completion(.failure(error))
@@ -669,7 +676,7 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             // Something went wrong; return the error message.
             if let error = error {
                 completion(.failure(error))
@@ -742,7 +749,7 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             // Something went wrong; return the error message.
             if let error = error {
                 completion(.failure(error))
@@ -797,7 +804,7 @@ public class WFClient {
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             // Something went wrong; return the error message.
             if let error = error {
                 // ⚠️ HACK: There's something that URLSession doesn't like about 204 NO CONTENT response that the API
@@ -883,7 +890,7 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             // Something went wrong; return the error message.
             if let error = error {
                 completion(.failure(error))
@@ -933,7 +940,7 @@ public class WFClient {
         request.addValue(tokenToDelete, forHTTPHeaderField: "Authorization")
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             // Something went wrong; return the error message.
             if let error = error {
                 // ⚠️ HACK: There's something that URLSession doesn't like about 204 NO CONTENT response that the API
@@ -996,7 +1003,7 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             // Something went wrong; return the error message.
             if let error = error {
                 completion(.failure(error))
@@ -1035,7 +1042,7 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
             // Something went wrong; return the error message.
             if let error = error {
                 completion(.failure(error))
@@ -1080,7 +1087,10 @@ private extension WFClient {
 // MARK: - Protocol conformance
 
 extension URLSession: URLSessionProtocol {
-    func dataTask(with request: URLRequest, completionHandler: @escaping DataTaskResult) -> URLSessionDataTaskProtocol {
+    public func dataTask(
+        with request: URLRequest,
+        completionHandler: @escaping DataTaskResult
+    ) -> URLSessionDataTaskProtocol {
         return dataTask(with: request, completionHandler: completionHandler) as URLSessionDataTask
     }
 }
