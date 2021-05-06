@@ -1,5 +1,20 @@
 import Foundation
 
+// MARK: - URLSession-related protocols
+
+/// Define requirements for `URLSession`s here for dependency-injection purposes (specifically, for testing).
+protocol URLSessionProtocol {
+    typealias DataTaskResult = (Data?, URLResponse?, Error?) -> Void
+    func dataTask(with request: URLRequest, completionHandler: @escaping DataTaskResult) -> URLSessionDataTaskProtocol
+}
+
+/// Define requirements for `URLSessionDataTask`s here for dependency-injection purposes (specifically, for testing).
+protocol URLSessionDataTaskProtocol {
+    func resume()
+}
+
+// MARK: - Class definition
+
 public class WFClient {
     let decoder = JSONDecoder()
 
@@ -1061,3 +1076,13 @@ private extension WFClient {
         }
     }
 }
+
+// MARK: - Protocol conformance
+
+extension URLSession: URLSessionProtocol {
+    func dataTask(with request: URLRequest, completionHandler: @escaping DataTaskResult) -> URLSessionDataTaskProtocol {
+        return dataTask(with: request, completionHandler: completionHandler) as URLSessionDataTask
+    }
+}
+
+extension URLSessionDataTask: URLSessionDataTaskProtocol {}
