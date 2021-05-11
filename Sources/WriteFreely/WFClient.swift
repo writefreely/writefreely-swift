@@ -255,40 +255,27 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        let dataTask = session.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
-                completion(.failure(error))
-            }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
-                if response.statusCode == 200 {
-                    do {
-                        // The response is formatted differently depending on if we're getting user posts or collection
-                        // posts,so we need to determine what kind of structure we're decoding based on the
-                        // collectionAlias argument.
-                        if collectionAlias != nil {
-                            let post = try self.decoder.decode(NestedPostsJson.self, from: data)
-                            completion(.success(post.data))
-                        } else {
-                            let post = try self.decoder.decode(ServerData<[WFPost]>.self, from: data)
-                            completion(.success(post.data))
-                        }
-                    } catch {
-                        completion(.failure(error))
+        get(with: request) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    // The response is formatted differently depending on if we're getting user posts or collection
+                    // posts,so we need to determine what kind of structure we're decoding based on the
+                    // collectionAlias argument.
+                    if collectionAlias != nil {
+                        let post = try self.decoder.decode(NestedPostsJson.self, from: data)
+                        completion(.success(post.data))
+                    } else {
+                        let post = try self.decoder.decode(ServerData<[WFPost]>.self, from: data)
+                        completion(.success(post.data))
                     }
-                } else {
-                    // We didn't get a 200 OK, so return a WFError.
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
+                } catch {
                     completion(.failure(error))
                 }
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
-
-        dataTask.resume()
     }
 
     /// Moves a post to a collection.
