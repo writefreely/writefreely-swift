@@ -715,51 +715,14 @@ public class WFClient {
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
 
-        let dataTask = session.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
-                // ⚠️ HACK: There's something that URLSession doesn't like about 204 NO CONTENT response that the API
-                //          server is returning. If we get back a "protocol error", the operation probably succeeded,
-                //          but URLSession is being pedantic/cranky and throwing an NSPOSIXErrorDomain error code 100.
-                //          Here, we check for that error, make sure the token was invalidated, and only then fire the
-                //          success case in the completion block.
-                let nsError = error as NSError
-                if nsError.code == 100 && nsError.domain == NSPOSIXErrorDomain {
-                    // Confirm that the operation succeeded by testing for a 404 on the same token.
-                    self.deletePost(postId: postId) { result in
-                        do {
-                            _ = try result.get()
-                            completion(.failure(error))
-                        } catch WFError.notFound {
-                            completion(.success(true))
-                        } catch WFError.unauthorized {
-                            completion(.success(true))
-                        } catch WFError.internalServerError {
-                            // If you try to delete a non-existent post, the API returns a 500 Internal Server Error.
-                            completion(.success(true))
-                        } catch {
-                            completion(.failure(error))
-                        }
-                    }
-                } else {
-                    completion(.failure(error))
-                }
-            }
-
-            if let response = response as? HTTPURLResponse {
-                // We got a response. If it's a 204 NO CONTENT, return true as success;
-                // if not, return a WFError as failure.
-                if response.statusCode != 204 {
-                    guard let data = data else { return }
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
-                    completion(.failure(error))
-                } else {
-                    completion(.success(true))
-                }
+        delete(with: request) { result in
+            switch result {
+            case .success(_):
+                completion(.success(true))
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
-
-        dataTask.resume()
     }
 
     /* Placeholder method stub: API design for this feature is not yet finalized.
