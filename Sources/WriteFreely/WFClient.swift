@@ -280,27 +280,14 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = session.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
+        post(with: request, expecting: 200) { result in
+            switch result {
+            case .success(_):
+                completion(.success(true))
+            case .failure(let error):
                 completion(.failure(error))
             }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 200 OK, return true as success; if not, return a WFError as failure.
-                if response.statusCode == 200 {
-                    completion(.success(true))
-                } else {
-                    // We didn't get a 200 OK, so return a WFError
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
-                    completion(.failure(error))
-                }
-            }
         }
-
-        dataTask.resume()
     }
 
     /// Pins a post to a collection.
