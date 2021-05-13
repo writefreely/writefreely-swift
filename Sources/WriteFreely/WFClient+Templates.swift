@@ -36,7 +36,7 @@ extension WFClient {
 
         dataTask.resume()
     }
-    
+
     /// Sends a `POST` request.
     /// - Parameters:
     ///   - request: The `URLRequest` for the `POST` request
@@ -76,7 +76,7 @@ extension WFClient {
 
         dataTask.resume()
     }
-    
+
     /// Sends a `DELETE` request.
     /// - Parameters:
     ///   - request: The `URLRequest` for the `DELETE` request
