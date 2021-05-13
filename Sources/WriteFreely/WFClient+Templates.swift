@@ -40,8 +40,13 @@ extension WFClient {
     /// Sends a `POST` request.
     /// - Parameters:
     ///   - request: The `URLRequest` for the `POST` request
+    ///   - expecting: The status code expected to be returned by the server
     ///   - completion: A closure that captures a `Result` with a `Data` object on success, or a `WFError` on failure.
-    func post(with request: URLRequest, completion: @escaping (Result<Data, WFError>) -> Void) {
+    func post(
+        with request: URLRequest,
+        expecting statusCode: Int,
+        completion: @escaping (Result<Data, WFError>) -> Void
+    ) {
         if request.httpMethod != "POST" {
             preconditionFailure("Expected POST request, but got \(request.httpMethod ?? "nil")")
         }
@@ -52,7 +57,7 @@ extension WFClient {
                 return
             }
 
-            guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            guard let response = response as? HTTPURLResponse, response.statusCode == statusCode else {
                 if let response = response as? HTTPURLResponse {
                     completion(.failure(WFError(rawValue: response.statusCode) ?? .invalidResponse))
                 } else {
