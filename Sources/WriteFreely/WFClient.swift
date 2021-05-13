@@ -454,33 +454,19 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = session.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
-                completion(.failure(error))
-            }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 200 OK, return the WFPost as success; if not, return a WFError as failure.
-                if response.statusCode == 201 {
-                    do {
-                        let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
-
-                        completion(.success(post.data))
-                    } catch {
-                        completion(.failure(error))
-                    }
-                } else {
-                    // We didn't get a 200 OK, so return a WFError
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
+        self.post(with: request, expecting: 201) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
+                    completion(.success(post.data))
+                } catch {
                     completion(.failure(error))
                 }
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
-
-        dataTask.resume()
     }
 
     /// Retrieves a post.
