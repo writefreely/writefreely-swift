@@ -1,42 +1,23 @@
 import Foundation
 
-struct ServerData<T: Decodable>: Decodable {
-    enum CodingKeys: String, CodingKey {
-        case code
-        case data
-    }
+// MARK: - URLSession-related protocols
 
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        code = try container.decode(Int.self, forKey: .code)
-        data = try container.decode(T.self, forKey: .data)
-    }
-
-    let code: Int
-    let data: T
+/// Define requirements for `URLSession`s here for dependency-injection purposes (specifically, for testing).
+public protocol URLSessionProtocol {
+    typealias DataTaskResult = (Data?, URLResponse?, Error?) -> Void
+    func dataTask(with request: URLRequest, completionHandler: @escaping DataTaskResult) -> URLSessionDataTaskProtocol
 }
 
-struct NestedPostsJson: Decodable {
-    enum CodingKeys: String, CodingKey {
-        case code
-        case data
-
-        enum PostKeys: String, CodingKey {
-            case posts
-        }
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let postsContainer = try container.nestedContainer(keyedBy: CodingKeys.PostKeys.self, forKey: .data)
-        data = try postsContainer.decode([WFPost].self, forKey: .posts)
-    }
-
-    let data: [WFPost]
+/// Define requirements for `URLSessionDataTask`s here for dependency-injection purposes (specifically, for testing).
+public protocol URLSessionDataTaskProtocol {
+    func resume()
 }
+
+// MARK: - Class definition
 
 public class WFClient {
-    let decoder = JSONDecoder()
+    let decoder: JSONDecoder
+    let session: URLSessionProtocol
 
     public var requestURL: URL
     public var user: WFUser?
@@ -45,11 +26,17 @@ public class WFClient {
     ///
     /// Required for connecting to the API endpoints of a WriteFreely instance.
     ///
-    /// - Parameter instanceURL: The URL for the WriteFreely instance to which we're connecting, including the protocol.
-    public init(for instanceURL: URL) {
+    /// - Parameters:
+    ///   - instanceURL: The URL for the WriteFreely instance to which we're connecting, including the protocol.
+    ///   - session: The URL session to use for connections; defaults to `URLSession.shared`.
+    public init(for instanceURL: URL, with session: URLSessionProtocol = URLSession.shared) {
+        decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        self.session = session
+
         // TODO: - Check that the protocol for instanceURL is HTTPS
         requestURL = URL(string: "api/", relativeTo: instanceURL) ?? instanceURL
-        decoder.dateDecodingStrategy = .iso8601
     }
 
     // MARK: - Collection-related methods
@@ -98,33 +85,19 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
-                completion(.failure(error))
-            }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 201 CREATED, return the WFCollection as success; if not, return a WFError as failure.
-                if response.statusCode == 201 {
-                    do {
-                        let collection = try self.decoder.decode(ServerData<WFCollection>.self, from: data)
-
-                        completion(.success(collection.data))
-                    } catch {
-                        completion(.failure(error))
-                    }
-                } else {
-                    // We didn't get a 200 OK, so return a WFError
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
+        post(with: request, expecting: 201) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    let collection = try self.decoder.decode(ServerData<WFCollection>.self, from: data)
+                    completion(.success(collection.data))
+                } catch {
                     completion(.failure(error))
                 }
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
-
-        dataTask.resume()
     }
 
     /// Retrieves a collection's metadata.
@@ -150,33 +123,19 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
+        get(with: request) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    let collection = try self.decoder.decode(ServerData<WFCollection>.self, from: data)
+                    completion(.success(collection.data))
+                } catch {
+                    completion(.failure(WFError.invalidData))
+                }
+            case .failure(let error):
                 completion(.failure(error))
             }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
-                if response.statusCode == 200 {
-                    do {
-                        let collection = try self.decoder.decode(ServerData<WFCollection>.self, from: data)
-
-                        completion(.success(collection.data))
-                    } catch {
-                        completion(.failure(error))
-                    }
-                } else {
-                    // We didn't get a 200 OK, so return a WFError
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
-                    completion(.failure(error))
-                }
-            }
         }
-
-        dataTask.resume()
     }
 
     /// Permanently deletes a collection.
@@ -202,48 +161,14 @@ public class WFClient {
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
-                // ⚠️ HACK: There's something that URLSession doesn't like about 204 NO CONTENT response that the API
-                //          server is returning. If we get back a "protocol error", the operation probably succeeded,
-                //          but URLSession is being pedantic/cranky and throwing an NSPOSIXErrorDomain error code 100.
-                //          Here, we check for that error, make sure the token was invalidated, and only then fire the
-                //          success case in the completion block.
-                let nsError = error as NSError
-                if nsError.code == 100 && nsError.domain == NSPOSIXErrorDomain {
-                    // Confirm that the operation succeeded by testing for a 404 on the same token.
-                    self.deleteCollection(withAlias: alias) { result in
-                        do {
-                            _ = try result.get()
-                            completion(.failure(error))
-                        } catch WFError.notFound {
-                            completion(.success(true))
-                        } catch WFError.unauthorized {
-                            completion(.success(true))
-                        } catch {
-                            completion(.failure(error))
-                        }
-                    }
-                } else {
-                    completion(.failure(error))
-                }
-            }
-
-            if let response = response as? HTTPURLResponse {
-                // We got a response. If it's a 204 NO CONTENT, return true as success;
-                // if not, return a WFError as failure.
-                if response.statusCode != 204 {
-                    guard let data = data else { return }
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
-                    completion(.failure(error))
-                } else {
-                    completion(.success(true))
-                }
+        delete(with: request) { result in
+            switch result {
+            case .success(_):
+                completion(.success(true))
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
-
-        dataTask.resume()
     }
 
     // MARK: - Post-related methods
@@ -282,40 +207,27 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
-                completion(.failure(error))
-            }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
-                if response.statusCode == 200 {
-                    do {
-                        // The response is formatted differently depending on if we're getting user posts or collection
-                        // posts,so we need to determine what kind of structure we're decoding based on the
-                        // collectionAlias argument.
-                        if collectionAlias != nil {
-                            let post = try self.decoder.decode(NestedPostsJson.self, from: data)
-                            completion(.success(post.data))
-                        } else {
-                            let post = try self.decoder.decode(ServerData<[WFPost]>.self, from: data)
-                            completion(.success(post.data))
-                        }
-                    } catch {
-                        completion(.failure(error))
+        get(with: request) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    // The response is formatted differently depending on if we're getting user posts or collection
+                    // posts,so we need to determine what kind of structure we're decoding based on the
+                    // collectionAlias argument.
+                    if collectionAlias != nil {
+                        let post = try self.decoder.decode(NestedPostsJson.self, from: data)
+                        completion(.success(post.data))
+                    } else {
+                        let post = try self.decoder.decode(ServerData<[WFPost]>.self, from: data)
+                        completion(.success(post.data))
                     }
-                } else {
-                    // We didn't get a 200 OK, so return a WFError.
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
+                } catch {
                     completion(.failure(error))
                 }
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
-
-        dataTask.resume()
     }
 
     /// Moves a post to a collection.
@@ -368,27 +280,14 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
+        post(with: request, expecting: 200) { result in
+            switch result {
+            case .success(_):
+                completion(.success(true))
+            case .failure(let error):
                 completion(.failure(error))
             }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 200 OK, return true as success; if not, return a WFError as failure.
-                if response.statusCode == 200 {
-                    completion(.success(true))
-                } else {
-                    // We didn't get a 200 OK, so return a WFError
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
-                    completion(.failure(error))
-                }
-            }
         }
-
-        dataTask.resume()
     }
 
     /// Pins a post to a collection.
@@ -442,27 +341,14 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
+        post(with: request, expecting: 200) { result in
+            switch result {
+            case .success(_):
+                completion(.success(true))
+            case .failure(let error):
                 completion(.failure(error))
             }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
-                if response.statusCode == 200 {
-                    completion(.success(true))
-                } else {
-                    // We didn't get a 200 OK, so return a WFError
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
-                    completion(.failure(error))
-                }
-            }
         }
-
-        dataTask.resume()
     }
 
     /// Unpins a post from a collection.
@@ -503,27 +389,14 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
+        post(with: request, expecting: 200) { result in
+            switch result {
+            case .success(_):
+                completion(.success(true))
+            case .failure(let error):
                 completion(.failure(error))
             }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
-                if response.statusCode == 200 {
-                    completion(.success(true))
-                } else {
-                    // We didn't get a 200 OK, so return a WFError
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
-                    completion(.failure(error))
-                }
-            }
         }
-
-        dataTask.resume()
     }
 
     /// Creates a new post.
@@ -581,33 +454,19 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
-                completion(.failure(error))
-            }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 200 OK, return the WFPost as success; if not, return a WFError as failure.
-                if response.statusCode == 201 {
-                    do {
-                        let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
-
-                        completion(.success(post.data))
-                    } catch {
-                        completion(.failure(error))
-                    }
-                } else {
-                    // We didn't get a 200 OK, so return a WFError
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
+        self.post(with: request, expecting: 201) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
+                    completion(.success(post.data))
+                } catch {
                     completion(.failure(error))
                 }
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
-
-        dataTask.resume()
     }
 
     /// Retrieves a post.
@@ -632,33 +491,19 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
-                completion(.failure(error))
-            }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
-                if response.statusCode == 200 {
-                    do {
-                        let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
-
-                        completion(.success(post.data))
-                    } catch {
-                        completion(.failure(error))
-                    }
-                } else {
-                    // We didn't get a 200 OK, so return a WFError
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
+        get(with: request) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
+                    completion(.success(post.data))
+                } catch {
                     completion(.failure(error))
                 }
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
-
-        dataTask.resume()
     }
 
     /// Retrieves a post from a collection.
@@ -689,33 +534,19 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
-                completion(.failure(error))
-            }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
-                if response.statusCode == 200 {
-                    do {
-                        let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
-
-                        completion(.success(post.data))
-                    } catch {
-                        completion(.failure(error))
-                    }
-                } else {
-                    // We didn't get a 200 OK, so return a WFError
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
+        get(with: request) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
+                    completion(.success(post.data))
+                } catch {
                     completion(.failure(error))
                 }
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
-
-        dataTask.resume()
     }
 
     /// Updates an existing post.
@@ -762,33 +593,19 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
-                completion(.failure(error))
-            }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 200 OK, return the WFPost as success; if not, return a WFError as failure.
-                if response.statusCode == 200 {
-                    do {
-                        let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
-
-                        completion(.success(post.data))
-                    } catch {
-                        completion(.failure(error))
-                    }
-                } else {
-                    // We didn't get a 200 OK, so return a WFError
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
+        post(with: request, expecting: 200) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    let post = try self.decoder.decode(ServerData<WFPost>.self, from: data)
+                    completion(.success(post.data))
+                } catch {
                     completion(.failure(error))
                 }
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
-
-        dataTask.resume()
     }
 
     /// Deletes an existing post.
@@ -817,51 +634,14 @@ public class WFClient {
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
-                // ⚠️ HACK: There's something that URLSession doesn't like about 204 NO CONTENT response that the API
-                //          server is returning. If we get back a "protocol error", the operation probably succeeded,
-                //          but URLSession is being pedantic/cranky and throwing an NSPOSIXErrorDomain error code 100.
-                //          Here, we check for that error, make sure the token was invalidated, and only then fire the
-                //          success case in the completion block.
-                let nsError = error as NSError
-                if nsError.code == 100 && nsError.domain == NSPOSIXErrorDomain {
-                    // Confirm that the operation succeeded by testing for a 404 on the same token.
-                    self.deletePost(postId: postId) { result in
-                        do {
-                            _ = try result.get()
-                            completion(.failure(error))
-                        } catch WFError.notFound {
-                            completion(.success(true))
-                        } catch WFError.unauthorized {
-                            completion(.success(true))
-                        } catch WFError.internalServerError {
-                            // If you try to delete a non-existent post, the API returns a 500 Internal Server Error.
-                            completion(.success(true))
-                        } catch {
-                            completion(.failure(error))
-                        }
-                    }
-                } else {
-                    completion(.failure(error))
-                }
-            }
-
-            if let response = response as? HTTPURLResponse {
-                // We got a response. If it's a 204 NO CONTENT, return true as success;
-                // if not, return a WFError as failure.
-                if response.statusCode != 204 {
-                    guard let data = data else { return }
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
-                    completion(.failure(error))
-                } else {
-                    completion(.success(true))
-                }
+        delete(with: request) { result in
+            switch result {
+            case .success(_):
+                completion(.success(true))
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
-
-        dataTask.resume()
     }
 
     /* Placeholder method stub: API design for this feature is not yet finalized.
@@ -903,37 +683,20 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
-                completion(.failure(error))
-            }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
-                if response.statusCode == 200 {
-                    do {
-                        let user = try self.decoder.decode(WFUser.self, from: data)
-                        self.user = user
-                        completion(.success(user))
-                    } catch {
-                        completion(.failure(error))
-                    }
-                } else {
-                    // We didn't get a 200 OK, so return a WFError
-                    guard let error = self.translateWFError(fromServerResponse: data) else {
-                        // We couldn't generate a WFError from the server response data, so return an unknown error.
-                        completion(.failure(WFError.unknownError))
-                        return
-                    }
+        post(with: request, expecting: 200) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    let user = try self.decoder.decode(WFUser.self, from: data)
+                    self.user = user
+                    completion(.success(user))
+                } catch {
                     completion(.failure(error))
                 }
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
-
-        dataTask.resume()
     }
 
     /// Invalidates the user's access token.
@@ -953,51 +716,15 @@ public class WFClient {
         request.addValue(tokenToDelete, forHTTPHeaderField: "Authorization")
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
-                // ⚠️ HACK: There's something that URLSession doesn't like about 204 NO CONTENT response that the API
-                //          server is returning. If we get back a "protocol error", the operation probably succeeded,
-                //          but URLSession is being pedantic/cranky and throwing an NSPOSIXErrorDomain error code 100.
-                //          Here, we check for that error, make sure the token was invalidated, and only then fire the
-                //          success case in the completion block.
-                let nsError = error as NSError
-                if nsError.code == 100 && nsError.domain == NSPOSIXErrorDomain {
-                    // Confirm that the operation succeeded by testing for a 404 on the same token.
-                    self.logout(token: tokenToDelete) { result in
-                        do {
-                            _ = try result.get()
-                            completion(.failure(error))
-                        } catch WFError.notFound {
-                            self.user = nil
-                            completion(.success(true))
-                        } catch WFError.unauthorized {
-                            self.user = nil
-                            completion(.success(true))
-                        } catch {
-                            completion(.failure(error))
-                        }
-                    }
-                } else {
-                    completion(.failure(error))
-                }
-            }
-
-            if let response = response as? HTTPURLResponse {
-                // We got a response. If it's a 204 NO CONTENT, return true as success;
-                // if not, return a WFError as failure.
-                if response.statusCode != 204 {
-                    guard let data = data else { return }
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
-                    completion(.failure(error))
-                } else {
-                    self.user = nil
-                    completion(.success(true))
-                }
+        delete(with: request) { result in
+            switch result {
+            case .success(_):
+                self.user = nil
+                completion(.success(true))
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
-
-        dataTask.resume()
     }
 
     /// Retrieves a user's basic data.
@@ -1016,27 +743,14 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
+        get(with: request) { result in
+            switch result {
+            case .success(let data):
+                completion(.success(data))
+            case .failure(let error):
                 completion(.failure(error))
             }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
-                if response.statusCode == 200 {
-                    completion(.success(data))
-                } else {
-                    // We didn't get a 200 OK, so return a WFError.
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
-                    completion(.failure(error))
-                }
-            }
         }
-
-        dataTask.resume()
     }
 
     /// Retrieves a user's collections.
@@ -1055,32 +769,19 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            // Something went wrong; return the error message.
-            if let error = error {
-                completion(.failure(error))
-            }
-
-            if let response = response as? HTTPURLResponse {
-                guard let data = data else { return }
-
-                // If we get a 200 OK, return the WFUser as success; if not, return a WFError as failure.
-                if response.statusCode == 200 {
-                    do {
-                        let collection = try self.decoder.decode(ServerData<[WFCollection]>.self, from: data)
-                        completion(.success(collection.data))
-                    } catch {
-                        completion(.failure(error))
-                    }
-                } else {
-                    // We didn't get a 200 OK, so return a WFError.
-                    guard let error = self.translateWFError(fromServerResponse: data) else { return }
+        get(with: request) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    let collection = try self.decoder.decode(ServerData<[WFCollection]>.self, from: data)
+                    completion(.success(collection.data))
+                } catch {
                     completion(.failure(error))
                 }
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
-
-        dataTask.resume()
     }
 }
 
@@ -1096,3 +797,16 @@ private extension WFClient {
         }
     }
 }
+
+// MARK: - Protocol conformance
+
+extension URLSession: URLSessionProtocol {
+    public func dataTask(
+        with request: URLRequest,
+        completionHandler: @escaping DataTaskResult
+    ) -> URLSessionDataTaskProtocol {
+        return dataTask(with: request, completionHandler: completionHandler) as URLSessionDataTask
+    }
+}
+
+extension URLSessionDataTask: URLSessionDataTaskProtocol {}
