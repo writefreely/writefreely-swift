@@ -1,7 +1,7 @@
 # WFPost
 
 ``` swift
-public struct WFPost
+public struct WFPost 
 ```
 
 ## Inheritance
@@ -15,7 +15,14 @@ public struct WFPost
 Creates a basic `WFPost` object.
 
 ``` swift
-public init(body: String, title: String? = nil, appearance: String? = nil, language: String? = nil, rtl: Bool? = nil, createdDate: Date? = nil)
+public init(
+        body: String,
+        title: String? = nil,
+        appearance: String? = nil,
+        language: String? = nil,
+        rtl: Bool? = nil,
+        createdDate: Date? = nil
+    ) 
 ```
 
 This initializer creates a bare-minimum `WFPost` object for sending to the server; use the decoder-based
@@ -26,26 +33,26 @@ the server.
 
 #### Parameters
 
-  - body: - body: The body text for the post.
-  - title: - title: The title for the post.
-  - appearance: - appearance: The appearance for the post; one of `sans`, `serif`/`norm`, `wrap`, `mono`,  or `code`. Defaults to `serif`.
-  - language: - language: An ISO 639-1 language code.
-  - rtl: - rtl: Set to `true` to show content right-to-left.
-  - createdDate: - createdDate: The published date for the post.
+  - body: The body text for the post.
+  - title: The title for the post.
+  - appearance: The appearance for the post; one of `sans`, `serif`/`norm`, `wrap`, `mono`,  or `code`. Defaults to `serif`.
+  - language: An ISO 639-1 language code.
+  - rtl: Set to `true` to show content right-to-left.
+  - createdDate: The published date for the post.
 
 ### `init(from:)`
 
 Creates a `WFPost` object from the server response.
 
 ``` swift
-public init(from decoder: Decoder) throws
+public init(from decoder: Decoder) throws 
 ```
 
 Primarily used by the `WFClient` to create a `WFPost` object from the JSON returned by the server.
 
 #### Parameters
 
-  - decoder: - decoder: The decoder to use for translating the server response to a Swift object.
+  - decoder: The decoder to use for translating the server response to a Swift object.
 
 #### Throws
 
@@ -56,71 +63,71 @@ Error thrown by the `try` attempt when decoding any given property.
 ### `postId`
 
 ``` swift
-var postId: String?
+public var postId: String?
 ```
 
 ### `slug`
 
 ``` swift
-var slug: String?
+public var slug: String?
 ```
 
 ### `appearance`
 
 ``` swift
-var appearance: String?
+public var appearance: String?
 ```
 
 ### `language`
 
 ``` swift
-var language: String?
+public var language: String?
 ```
 
 ### `rtl`
 
 ``` swift
-var rtl: Bool?
+public var rtl: Bool?
 ```
 
 ### `createdDate`
 
 ``` swift
-var createdDate: Date?
+public var createdDate: Date?
 ```
 
 ### `updatedDate`
 
 ``` swift
-var updatedDate: Date?
+public var updatedDate: Date?
 ```
 
 ### `title`
 
 ``` swift
-var title: String?
+public var title: String?
 ```
 
 ### `body`
 
 ``` swift
-var body: String
+public var body: String
 ```
 
 ### `tags`
 
 ``` swift
-var tags: [String]?
+public var tags: [String]?
 ```
 
 ### `views`
 
 ``` swift
-var views: Int?
+public var views: Int?
 ```
 
 ### `collectionAlias`
 
 ``` swift
-var collectionAlias: String?
+public var collectionAlias: String?
 ```
