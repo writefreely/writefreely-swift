@@ -17,7 +17,7 @@ extension WFClient {
                 return
             }
 
-            guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            guard let unwrappedResponse = response as? HTTPURLResponse, unwrappedResponse.statusCode == 200 else {
                 if let response = response as? HTTPURLResponse {
                     completion(.failure(WFError(rawValue: response.statusCode) ?? .invalidResponse))
                 } else {
@@ -57,7 +57,7 @@ extension WFClient {
                 return
             }
 
-            guard let response = response as? HTTPURLResponse, response.statusCode == statusCode else {
+            guard let unwrappedResponse = response as? HTTPURLResponse, unwrappedResponse.statusCode == statusCode else {
                 if let response = response as? HTTPURLResponse {
                     completion(.failure(WFError(rawValue: response.statusCode) ?? .invalidResponse))
                 } else {
@@ -92,7 +92,7 @@ extension WFClient {
                 return
             }
 
-            guard let response = response as? HTTPURLResponse, response.statusCode == 204 else {
+            guard let unwrappedResponse = response as? HTTPURLResponse, unwrappedResponse.statusCode == 204 else {
                 if let response = response as? HTTPURLResponse {
                     completion(.failure(WFError(rawValue: response.statusCode) ?? .invalidResponse))
                 } else {
