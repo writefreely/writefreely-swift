@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WriteFreely - URLSessionProtocol</title>
+    <link rel="stylesheet" type="text/css" href="/all.css" media="all" />
+</head>
+<body>
+    <header>
+        <a href="/">
+            <strong>
+                WriteFreely
+            </strong>
+            <span>Documentation</span>
+        </a>
+        <sup>Beta</sup>
+    </header>
+
+    <!--
+    <form class="search">
+        <input type="search" placeholder="Search" />
+    </form>
+    -->
+
+    <nav>
+        <div class="wrapper">
+            <h2>On This Page</h2>
+            <ol><li><a href="#requirements">Requirements</a><ul><li class="typealias"><a href="#urlsessionprotocol.datataskresult">Data​Task​Result</a></li><li class="function"><a href="#urlsessionprotocol.datatask(with:completionhandler:)">data​Task(with:​completion​Handler:​)</a></li></ul></li></ol>
+        </div>
+    </nav>
+
+    <main>
+        <article>
+            <h1>
+    <small>Protocol</small>
+    <code class="name">URLSession​Protocol</code>
+</h1>
+
+<div class="declaration">
+<pre class="highlight"><code><span class="keyword">public</span> <span class="keyword">protocol</span> <span class="type">URLSessionProtocol</span> </code></pre>
+</div>
+<div class="summary" role="doc-abstract">
+    <p>Define requirements for <code>URLSession</code>s here for dependency-injection purposes (specifically, for testing).</p>
+
+</div>
+
+
+
+
+    <section id="requirements">
+        <h2>Requirements</h2>
+
+        <div role="article" class="typealias" id="urlsessionprotocol.datataskresult">
+    <h3>
+        <code>Data​Task​Result</code>
+    </h3>
+    <div class="declaration">
+<pre class="highlight"><code><span class="keyword">typealias</span> <span class="variable">DataTaskResult</span> = (<span class="type">Data</span>?, <span class="type">URLResponse</span>?, <span class="type">Error</span>?) -&gt; <span class="type">Void</span></code></pre>
+</div>
+</div>
+<div role="article" class="function" id="urlsessionprotocol.datatask(with:completionhandler:)">
+    <h3>
+        <code>data​Task(with:​completion​Handler:​)</code>
+    </h3>
+    <div class="declaration">
+<pre class="highlight"><code><span class="keyword">func</span> <span class="function">dataTask</span>(<span class="variable">with</span> <span class="variable">request</span>: <span class="type">URLRequest</span>, <span class="variable">completionHandler</span>: <span class="attribute">@</span><span class="attribute">escaping</span> <span class="type">DataTaskResult</span>) -&gt; <span class="type">URLSessionDataTaskProtocol</span></code></pre>
+</div>
+</div>
+    </section>
+        </article>
+    </main>
+
+    <footer>
+        <p>
+    Generated on <time datetime="2021-05-27T16:04:27-0400">May 27, 2021</time> using <a href="https://github.com/SwiftDocOrg/swift-doc">swift-doc</a> <span class="version">1.0.0-beta.6</span>.
+</p>
+    </footer>
+</body>
+</html>
