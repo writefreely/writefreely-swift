@@ -14,9 +14,9 @@ import WriteFreely
     a free account on [Write.as](https://write.as). Once that's done, supply your `username`, `password`, and `instance`
     to the constants below.
  */
-let username: String = "hello"// "username"
-let password: String = "hi"// "password"
-let instance: String = "https://pencil.writefree.ly" //"https://write.as"
+let username: String = "username"
+let password: String = "password"
+let instance: String = "https://write.as"
 
 /*:
  * callout(The Plan):
@@ -93,7 +93,7 @@ func createAndPublishSamplePost() {
 }
 
 /*:
- * callout(Logging Out)
+ * callout(Logging Out):
     This is very important! When you're done with the session, make sure to call the `logout(completion:)` function to
     make sure that the user's access token is invalidated by the server.
  */
