@@ -789,10 +789,8 @@ private extension WFClient {
     func translateWFError(fromServerResponse response: Data) -> WFError? {
         do {
             let error = try self.decoder.decode(ErrorMessage.self, from: response)
-            print("⛔️ \(error.message)")
             return WFError(rawValue: error.code)
         } catch {
-            print("⛔️ An unknown error occurred.")
             return WFError.unknownError
         }
     }
