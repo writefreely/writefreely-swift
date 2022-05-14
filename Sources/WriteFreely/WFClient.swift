@@ -57,7 +57,10 @@ public class WFClient {
         alias: String? = nil,
         completion: @escaping (Result<WFCollection, Error>) -> Void
     ) {
-        if token == nil && user == nil { completion(.failure(WFError.couldNotComplete)) }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         guard let tokenToVerify = token ?? user?.token else {
             completion(.failure(WFError.couldNotComplete))
             return
