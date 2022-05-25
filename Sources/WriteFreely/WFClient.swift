@@ -57,10 +57,19 @@ public class WFClient {
         alias: String? = nil,
         completion: @escaping (Result<WFCollection, Error>) -> Void
     ) {
-        if token == nil && user == nil { return }
-        guard let tokenToVerify = token ?? user?.token else { return }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
+        guard let tokenToVerify = token ?? user?.token else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        guard let url = URL(string: "collections", relativeTo: requestURL) else { return }
+        guard let url = URL(string: "collections", relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         var request = URLRequest(url: url)
 
         request.httpMethod = "POST"
@@ -114,10 +123,19 @@ public class WFClient {
         withAlias alias: String,
         completion: @escaping (Result<WFCollection, Error>) -> Void
     ) {
-        if token == nil && user == nil { return }
-        guard let tokenToVerify = token ?? user?.token else { return }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
+        guard let tokenToVerify = token ?? user?.token else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        guard let url = URL(string: "collections/\(alias)", relativeTo: requestURL) else { return }
+        guard let url = URL(string: "collections/\(alias)", relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         var request = URLRequest(url: url)
 
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
@@ -151,10 +169,19 @@ public class WFClient {
         withAlias alias: String,
         completion: @escaping (Result<Bool, Error>) -> Void
     ) {
-        if token == nil && user == nil { return }
-        guard let tokenToVerify = token ?? user?.token else { return }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
+        guard let tokenToVerify = token ?? user?.token else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        guard let url = URL(string: "collections/\(alias)", relativeTo: requestURL) else { return }
+        guard let url = URL(string: "collections/\(alias)", relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         var request = URLRequest(url: url)
 
         request.httpMethod = "DELETE"
@@ -190,9 +217,15 @@ public class WFClient {
         in collectionAlias: String? = nil,
         completion: @escaping (Result<[WFPost], Error>) -> Void
     ) {
-        if token == nil && user == nil { return }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        guard let tokenToVerify = token ?? user?.token else { return }
+        guard let tokenToVerify = token ?? user?.token else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
         var path = ""
         if let alias = collectionAlias {
@@ -201,7 +234,10 @@ public class WFClient {
         } else {
             path = "me/posts"
         }
-        guard let url = URL(string: path, relativeTo: requestURL) else { return }
+        guard let url = URL(string: path, relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         var request = URLRequest(url: url)
 
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
@@ -249,10 +285,19 @@ public class WFClient {
         to collectionAlias: String?,
         completion: @escaping (Result<Bool, Error>) -> Void
     ) {
-        if token == nil && user == nil { return }
-        guard let tokenToVerify = token ?? user?.token else { return }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
+        guard let tokenToVerify = token ?? user?.token else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        if collectionAlias == nil && modifyToken != nil { completion(.failure(WFError.badRequest)) }
+        if collectionAlias == nil && modifyToken != nil {
+            completion(.failure(WFError.badRequest))
+            return
+        }
 
         var urlString = ""
         if let collectionAlias = collectionAlias {
@@ -260,7 +305,10 @@ public class WFClient {
         } else {
             urlString = "posts/disperse"
         }
-        guard let url = URL(string: urlString, relativeTo: requestURL) else { return }
+        guard let url = URL(string: urlString, relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         var request = URLRequest(url: url)
 
         request.httpMethod = "POST"
@@ -309,10 +357,19 @@ public class WFClient {
         in collectionAlias: String,
         completion: @escaping (Result<Bool, Error>) -> Void
     ) {
-        if token == nil && user == nil { return }
-        guard let tokenToVerify = token ?? user?.token else { return }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
+        guard let tokenToVerify = token ?? user?.token else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        guard let url = URL(string: "collections/\(collectionAlias)/pin", relativeTo: requestURL) else { return }
+        guard let url = URL(string: "collections/\(collectionAlias)/pin", relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         var request = URLRequest(url: url)
 
         request.httpMethod = "POST"
@@ -367,10 +424,19 @@ public class WFClient {
         from collectionAlias: String,
         completion: @escaping (Result<Bool, Error>) -> Void
     ) {
-        if token == nil && user == nil { return }
-        guard let tokenToVerify = token ?? user?.token else { return }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
+        guard let tokenToVerify = token ?? user?.token else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        guard let url = URL(string: "collections/\(collectionAlias)/unpin", relativeTo: requestURL) else { return }
+        guard let url = URL(string: "collections/\(collectionAlias)/unpin", relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         var request = URLRequest(url: url)
 
         request.httpMethod = "POST"
@@ -415,8 +481,14 @@ public class WFClient {
         in collectionAlias: String? = nil,
         completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
-        if token == nil && user == nil { return }
-        guard let tokenToVerify = token ?? user?.token else { return }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
+        guard let tokenToVerify = token ?? user?.token else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
         var path = ""
         if let alias = collectionAlias {
@@ -425,7 +497,10 @@ public class WFClient {
         } else {
             path = "posts"
         }
-        guard let url = URL(string: path, relativeTo: requestURL) else { return }
+        guard let url = URL(string: path, relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         var request = URLRequest(url: url)
 
         request.httpMethod = "POST"
@@ -482,10 +557,19 @@ public class WFClient {
         byId postId: String,
         completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
-        if token == nil && user == nil { return }
-        guard let tokenToVerify = token ?? user?.token else { return }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
+        guard let tokenToVerify = token ?? user?.token else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        guard let url = URL(string: "posts/\(postId)", relativeTo: requestURL) else { return }
+        guard let url = URL(string: "posts/\(postId)", relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         var request = URLRequest(url: url)
 
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
@@ -524,10 +608,17 @@ public class WFClient {
         from collectionAlias: String,
         completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
-        if token == nil && user == nil { return }
-        guard let tokenToVerify = token ?? user?.token else { return }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
+        guard let tokenToVerify = token ?? user?.token else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
         guard let url = URL(string: "collections/\(collectionAlias)/posts/\(slug)", relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
             return
         }
         var request = URLRequest(url: url)
@@ -569,10 +660,19 @@ public class WFClient {
         with modifyToken: String? = nil,
         completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
-        if token == nil && user == nil { return }
-        guard let tokenToVerify = token ?? user?.token else { return }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
+        guard let tokenToVerify = token ?? user?.token else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        guard let url = URL(string: "posts/\(postId)", relativeTo: requestURL) else { return }
+        guard let url = URL(string: "posts/\(postId)", relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         var request = URLRequest(url: url)
 
         request.httpMethod = "POST"
@@ -624,10 +724,19 @@ public class WFClient {
         with modifyToken: String? = nil,
         completion: @escaping (Result<Bool, Error>) -> Void
     ) {
-        if token == nil && user == nil { return }
-        guard let tokenToVerify = token ?? user?.token else { return }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
+        guard let tokenToVerify = token ?? user?.token else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        guard let url = URL(string: "posts/\(postId)", relativeTo: requestURL) else { return }
+        guard let url = URL(string: "posts/\(postId)", relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         var request = URLRequest(url: url)
 
         request.httpMethod = "DELETE"
@@ -666,7 +775,10 @@ public class WFClient {
     ///   - password: The user's password.
     ///   - completion: A handler for the `WFUser` object returned on success, or `Error` on failure.
     public func login(username: String, password: String, completion: @escaping (Result<WFUser, Error>) -> Void) {
-        guard let url = URL(string: "auth/login", relativeTo: requestURL) else { return }
+        guard let url = URL(string: "auth/login", relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         var request = URLRequest(url: url)
 
         request.httpMethod = "POST"
@@ -705,11 +817,20 @@ public class WFClient {
     ///   - token: The token to invalidate.
     ///   - completion: A handler for the `Bool` object returned on success, or `Error` on failure.
     public func logout(token: String? = nil, completion: @escaping (Result<Bool, Error>) -> Void) {
-        if token == nil && user == nil { return }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        guard let tokenToDelete = token ?? user?.token else { return }
+        guard let tokenToDelete = token ?? user?.token else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        guard let url = URL(string: "auth/me", relativeTo: requestURL) else { fatalError() }
+        guard let url = URL(string: "auth/me", relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         var request = URLRequest(url: url)
 
         request.httpMethod = "DELETE"
@@ -733,11 +854,20 @@ public class WFClient {
     ///   - token: The access token for the user to fetch.
     ///   - completion: A handler for the `Data` object returned on success, or `Error` on failure.
     public func getUserData(token: String? = nil, completion: @escaping (Result<Data, Error>) -> Void) {
-        if token == nil && user == nil { return }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        guard let tokenToVerify = token ?? user?.token else { return }
+        guard let tokenToVerify = token ?? user?.token else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        guard let url = URL(string: "me", relativeTo: requestURL) else { return }
+        guard let url = URL(string: "me", relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         var request = URLRequest(url: url)
 
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
@@ -759,11 +889,20 @@ public class WFClient {
     ///   - token: The access token for the user whose collections are to be retrieved.
     ///   - completion: A handler for the `[WFCollection]` object returned on success, or `Error` on failure.
     public func getUserCollections(token: String? = nil, completion: @escaping (Result<[WFCollection], Error>) -> Void) {
-        if token == nil && user == nil { return }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        guard let tokenToVerify = token ?? user?.token else { return }
+        guard let tokenToVerify = token ?? user?.token else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
-        guard let url = URL(string: "me/collections", relativeTo: requestURL) else { return }
+        guard let url = URL(string: "me/collections", relativeTo: requestURL) else {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         var request = URLRequest(url: url)
 
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
@@ -789,10 +928,8 @@ private extension WFClient {
     func translateWFError(fromServerResponse response: Data) -> WFError? {
         do {
             let error = try self.decoder.decode(ErrorMessage.self, from: response)
-            print("⛔️ \(error.message)")
             return WFError(rawValue: error.code)
         } catch {
-            print("⛔️ An unknown error occurred.")
             return WFError.unknownError
         }
     }
