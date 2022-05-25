@@ -123,7 +123,10 @@ public class WFClient {
         withAlias alias: String,
         completion: @escaping (Result<WFCollection, Error>) -> Void
     ) {
-        if token == nil && user == nil { completion(.failure(WFError.couldNotComplete)) }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         guard let tokenToVerify = token ?? user?.token else {
             completion(.failure(WFError.couldNotComplete))
             return
@@ -166,7 +169,10 @@ public class WFClient {
         withAlias alias: String,
         completion: @escaping (Result<Bool, Error>) -> Void
     ) {
-        if token == nil && user == nil { completion(.failure(WFError.couldNotComplete)) }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         guard let tokenToVerify = token ?? user?.token else {
             completion(.failure(WFError.couldNotComplete))
             return
@@ -211,7 +217,10 @@ public class WFClient {
         in collectionAlias: String? = nil,
         completion: @escaping (Result<[WFPost], Error>) -> Void
     ) {
-        if token == nil && user == nil { completion(.failure(WFError.couldNotComplete)) }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
         guard let tokenToVerify = token ?? user?.token else {
             completion(.failure(WFError.couldNotComplete))
@@ -276,13 +285,19 @@ public class WFClient {
         to collectionAlias: String?,
         completion: @escaping (Result<Bool, Error>) -> Void
     ) {
-        if token == nil && user == nil { completion(.failure(WFError.couldNotComplete)) }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         guard let tokenToVerify = token ?? user?.token else {
             completion(.failure(WFError.couldNotComplete))
             return
         }
 
-        if collectionAlias == nil && modifyToken != nil { completion(.failure(WFError.badRequest)) }
+        if collectionAlias == nil && modifyToken != nil {
+            completion(.failure(WFError.badRequest))
+            return
+        }
 
         var urlString = ""
         if let collectionAlias = collectionAlias {
@@ -342,7 +357,10 @@ public class WFClient {
         in collectionAlias: String,
         completion: @escaping (Result<Bool, Error>) -> Void
     ) {
-        if token == nil && user == nil { completion(.failure(WFError.couldNotComplete)) }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         guard let tokenToVerify = token ?? user?.token else {
             completion(.failure(WFError.couldNotComplete))
             return
@@ -406,7 +424,10 @@ public class WFClient {
         from collectionAlias: String,
         completion: @escaping (Result<Bool, Error>) -> Void
     ) {
-        if token == nil && user == nil { completion(.failure(WFError.couldNotComplete)) }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         guard let tokenToVerify = token ?? user?.token else {
             completion(.failure(WFError.couldNotComplete))
             return
@@ -460,7 +481,10 @@ public class WFClient {
         in collectionAlias: String? = nil,
         completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
-        if token == nil && user == nil { completion(.failure(WFError.couldNotComplete)) }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         guard let tokenToVerify = token ?? user?.token else {
             completion(.failure(WFError.couldNotComplete))
             return
@@ -533,7 +557,10 @@ public class WFClient {
         byId postId: String,
         completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
-        if token == nil && user == nil { completion(.failure(WFError.couldNotComplete)) }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         guard let tokenToVerify = token ?? user?.token else {
             completion(.failure(WFError.couldNotComplete))
             return
@@ -581,7 +608,10 @@ public class WFClient {
         from collectionAlias: String,
         completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
-        if token == nil && user == nil { completion(.failure(WFError.couldNotComplete)) }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         guard let tokenToVerify = token ?? user?.token else {
             completion(.failure(WFError.couldNotComplete))
             return
@@ -630,7 +660,10 @@ public class WFClient {
         with modifyToken: String? = nil,
         completion: @escaping (Result<WFPost, Error>) -> Void
     ) {
-        if token == nil && user == nil { completion(.failure(WFError.couldNotComplete)) }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         guard let tokenToVerify = token ?? user?.token else {
             completion(.failure(WFError.couldNotComplete))
             return
@@ -691,7 +724,10 @@ public class WFClient {
         with modifyToken: String? = nil,
         completion: @escaping (Result<Bool, Error>) -> Void
     ) {
-        if token == nil && user == nil { completion(.failure(WFError.couldNotComplete)) }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
         guard let tokenToVerify = token ?? user?.token else {
             completion(.failure(WFError.couldNotComplete))
             return
@@ -781,7 +817,10 @@ public class WFClient {
     ///   - token: The token to invalidate.
     ///   - completion: A handler for the `Bool` object returned on success, or `Error` on failure.
     public func logout(token: String? = nil, completion: @escaping (Result<Bool, Error>) -> Void) {
-        if token == nil && user == nil { completion(.failure(WFError.couldNotComplete)) }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
         guard let tokenToDelete = token ?? user?.token else {
             completion(.failure(WFError.couldNotComplete))
@@ -815,7 +854,10 @@ public class WFClient {
     ///   - token: The access token for the user to fetch.
     ///   - completion: A handler for the `Data` object returned on success, or `Error` on failure.
     public func getUserData(token: String? = nil, completion: @escaping (Result<Data, Error>) -> Void) {
-        if token == nil && user == nil { completion(.failure(WFError.couldNotComplete)) }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
         guard let tokenToVerify = token ?? user?.token else {
             completion(.failure(WFError.couldNotComplete))
@@ -847,7 +889,10 @@ public class WFClient {
     ///   - token: The access token for the user whose collections are to be retrieved.
     ///   - completion: A handler for the `[WFCollection]` object returned on success, or `Error` on failure.
     public func getUserCollections(token: String? = nil, completion: @escaping (Result<[WFCollection], Error>) -> Void) {
-        if token == nil && user == nil { completion(.failure(WFError.couldNotComplete)) }
+        if token == nil && user == nil {
+            completion(.failure(WFError.couldNotComplete))
+            return
+        }
 
         guard let tokenToVerify = token ?? user?.token else {
             completion(.failure(WFError.couldNotComplete))
