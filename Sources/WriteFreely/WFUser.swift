@@ -54,3 +54,19 @@ extension WFUser: Decodable {
         createdDate = try userContainer.decode(Date.self, forKey: .createdDate)
     }
 }
+
+extension WFUser {
+    static let testUser = WFUser(token: "00000000-0000-0000-0000-000000000000",
+                                 username: "matt",
+                                 email: "matt@example.com",
+                                 createdDate: DateComponents(calendar: .current,
+                                                             timeZone: TimeZone(abbreviation: "UTC"),
+                                                             year: 2015,
+                                                             month: 02,
+                                                             day: 03,
+                                                             hour: 02,
+                                                             minute: 41,
+                                                             second: 19
+                                                            ).date
+    )
+}

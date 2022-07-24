@@ -65,3 +65,15 @@ extension WFCollection: Decodable {
         url = try container.decodeIfPresent(String.self, forKey: .url)
     }
 }
+
+extension WFCollection {
+    static let testCollection = WFCollection(alias: "new-blog",
+                                             title: "Test Blog",
+                                             description: "",
+                                             styleSheet: "",
+                                             isPublic: true,
+                                             views: nil,
+                                             email: nil,
+                                             url: nil
+    )
+}
