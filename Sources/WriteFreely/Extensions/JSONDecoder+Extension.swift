@@ -6,13 +6,19 @@ extension JSONDecoder.DateDecodingStrategy {
 
     /// The strategy that formats dates according to the ISO 8601 standard.
     /// - Note: This includes the fractional seconds, unlike the standard `.iso8601`, which fails to decode those.
-    static var iso8601WithFractionalSeconds: JSONDecoder.DateDecodingStrategy {
+    static var iso8601WithPossibleFractionalSeconds: JSONDecoder.DateDecodingStrategy {
         JSONDecoder.DateDecodingStrategy.custom { (decoder) in
             let singleValue = try decoder.singleValueContainer()
             let dateString  = try singleValue.decode(String.self)
 
             let formatter = ISO8601DateFormatter()
-            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+
+            /// Use the `.withFractionalSeconds` option only if we have fractional seconds in the date string.
+            if dateString.contains(".") {
+                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            } else {
+                formatter.formatOptions = [.withInternetDateTime]
+            }
 
             guard let date = formatter.date(from: dateString) else {
                 throw DecodingError.dataCorruptedError(
