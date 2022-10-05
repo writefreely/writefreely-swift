@@ -31,7 +31,7 @@ public class WFClient {
     ///   - session: The URL session to use for connections; defaults to `URLSession.shared`.
     public init(for instanceURL: URL, with session: URLSessionProtocol = URLSession.shared) {
         decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .iso8601WithPossibleFractionalSeconds
 
         self.session = session
 
