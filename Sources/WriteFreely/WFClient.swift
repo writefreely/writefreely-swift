@@ -31,7 +31,7 @@ public class WFClient {
     ///   - session: The URL session to use for connections; defaults to `URLSession.shared`.
     public init(for instanceURL: URL, with session: URLSessionProtocol = URLSession.shared) {
         decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .iso8601WithPossibleFractionalSeconds
 
         self.session = session
 
@@ -94,7 +94,9 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        post(with: request, expecting: 201) { result in
+        post(with: request, expecting: 201) { [weak self] result in
+            guard let self = self else { return }
+
             switch result {
             case .success(let data):
                 do {
@@ -141,7 +143,9 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        get(with: request) { result in
+        get(with: request) { [weak self] result in
+            guard let self = self else { return }
+
             switch result {
             case .success(let data):
                 do {
@@ -243,7 +247,9 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        get(with: request) { result in
+        get(with: request) { [weak self] result in
+            guard let self = self else { return }
+
             switch result {
             case .success(let data):
                 do {
@@ -529,7 +535,9 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        self.post(with: request, expecting: 201) { result in
+        self.post(with: request, expecting: 201) { [weak self] result in
+            guard let self = self else { return }
+
             switch result {
             case .success(let data):
                 do {
@@ -575,7 +583,9 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        get(with: request) { result in
+        get(with: request) { [weak self] result in
+            guard let self = self else { return }
+
             switch result {
             case .success(let data):
                 do {
@@ -625,7 +635,9 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        get(with: request) { result in
+        get(with: request) { [weak self] result in
+            guard let self = self else { return }
+
             switch result {
             case .success(let data):
                 do {
@@ -693,7 +705,9 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        post(with: request, expecting: 200) { result in
+        post(with: request, expecting: 200) { [weak self] result in
+            guard let self = self else { return }
+
             switch result {
             case .success(let data):
                 do {
@@ -795,7 +809,9 @@ public class WFClient {
             completion(.failure(error))
         }
 
-        post(with: request, expecting: 200) { result in
+        post(with: request, expecting: 200) { [weak self] result in
+            guard let self = self else { return }
+
             switch result {
             case .success(let data):
                 do {
@@ -837,7 +853,9 @@ public class WFClient {
         request.addValue(tokenToDelete, forHTTPHeaderField: "Authorization")
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
 
-        delete(with: request) { result in
+        delete(with: request) { [weak self] result in
+            guard let self = self else { return }
+
             switch result {
             case .success(_):
                 self.user = nil
@@ -908,7 +926,9 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        get(with: request) { result in
+        get(with: request) { [weak self] result in
+            guard let self = self else { return }
+
             switch result {
             case .success(let data):
                 do {
