@@ -1,0 +1,13 @@
+{
+  "code": 201,
+  "data": {
+    "alias": "new-blog",
+    "title": "Test Blog",
+    "description": "",
+    "style_sheet": "",
+    "public": false,
+    "email": "new-blog-wjn6epspzjqankz41mlfvz@writeas.com",
+    "views": 0,
+    "total_posts": 0
+  }
+}

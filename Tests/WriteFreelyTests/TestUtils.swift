@@ -13,13 +13,14 @@ final class MockURLSession: URLSessionProtocol {
     var nextDataTask = MockURLSessionDataTask()
     var nextData: Data?
     var nextError: Error?
-    
+    var expectedStatusCode: Int = 200
+
     private (set) var lastRequest: URLRequest?
-    
+
     func successURLResponse(url: URL) -> URLResponse {
         return HTTPURLResponse(
             url: url,
-            statusCode: 200,
+            statusCode: expectedStatusCode,
             httpVersion: "HTTP/1.1",
             headerFields: nil
         )!
