@@ -3,7 +3,8 @@ import XCTest
 
 final class WriteFreelyClientTests: XCTestCase {
     static var allTests = [
-        ("testExample", testExample),
+        ("testWFClientInitializer_WithValidInstance_SetsRequestURL", testWFClientInitializer_WithValidInstance_SetsRequestURL),
+        ("testCreateCollection_WithValidCollectionData_CreatesNewWFCollection", testCreateCollection_WithValidCollectionData_CreatesNewWFCollection)
     ]
 
     var client: WFClient!
