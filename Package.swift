@@ -29,7 +29,7 @@ let package = Package(
             name: "WriteFreelyTests",
             dependencies: ["WriteFreely"],
             resources: [
-                .copy("Resources/test_collection.json")
+                .process("Resources")
             ]
         ),
     ]
