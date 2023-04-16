@@ -4,7 +4,8 @@ import XCTest
 final class WriteFreelyClientTests: XCTestCase {
     static var allTests = [
         ("testWFClientInitializer_WithValidInstance_SetsRequestURL", testWFClientInitializer_WithValidInstance_SetsRequestURL),
-        ("testCreateCollection_WithValidCollectionData_CreatesNewWFCollection", testCreateCollection_WithValidCollectionData_CreatesNewWFCollection)
+        ("testCreateCollection_WithValidCollectionData_CreatesNewWFCollection", testCreateCollection_WithValidCollectionData_CreatesNewWFCollection),
+        ("testCreateCollection_WithInvalidCollectionData_Returns400", testCreateCollection_WithInvalidCollectionData_Returns400)
     ]
 
     var client: WFClient!
@@ -64,6 +65,23 @@ final class WriteFreelyClientTests: XCTestCase {
         )
     }
 
+    func testCreateCollection_WithInvalidCollectionData_Returns400() {
+        guard let _ = try? session.setData(resource: "error_collection_400", fileExt: "json", for: self) else {
+            XCTFail("Error opening test resource file")
+            return
         }
+
+        session.expectedStatusCode = 400
+        client = WFClient(for: instanceURL, with: session)
+        client.user = user
+
+        client.createCollection(withTitle: "", completion: { result in
+            switch result {
+            case .success(let collection):
+                XCTFail("Created a collection named '\(collection.title)'")
+            case .failure(let error):
+                XCTAssertEqual(error as? WFError, WFError.badRequest)
+            }
+        })
     }
 }
