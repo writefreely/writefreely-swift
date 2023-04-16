@@ -1,4 +1,5 @@
 import Foundation
+import XCTest
 import WriteFreely
 
 final class MockURLSessionDataTask: URLSessionDataTaskProtocol {
@@ -34,5 +35,18 @@ final class MockURLSession: URLSessionProtocol {
             nextError
         )
         return nextDataTask
+    }
+
+    @discardableResult
+    func setData(resource: String, fileExt: String, for target: XCTestCase) throws -> URL? {
+        guard let fileURL = Bundle.module.url(forResource: resource, withExtension: fileExt) else {
+            return nil
+        }
+        do {
+            nextData = try Data(contentsOf: fileURL)
+            return fileURL
+        } catch {
+            throw error
+        }
     }
 }

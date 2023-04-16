@@ -30,7 +30,7 @@ final class WriteFreelyClientTests: XCTestCase {
     }
 
     func testCreateCollection_WithValidCollectionData_CreatesNewWFCollection() {
-        guard let _ = try? setSessionData(resource: "test_collection", fileExt: "json", for: self) else {
+        guard let _ = try? session.setData(resource: "test_collection", fileExt: "json", for: self) else {
             XCTFail("Error opening test resource file")
             return
         }
@@ -64,16 +64,6 @@ final class WriteFreelyClientTests: XCTestCase {
         )
     }
 
-    @discardableResult
-    private func setSessionData(resource: String, fileExt: String, for target: XCTestCase) throws -> URL? {
-        guard let fileURL = Bundle.module.url(forResource: resource, withExtension: fileExt) else {
-            return nil
-        }
-        do {
-            session.nextData = try Data(contentsOf: fileURL)
-            return fileURL
-        } catch {
-            throw error
         }
     }
 }
