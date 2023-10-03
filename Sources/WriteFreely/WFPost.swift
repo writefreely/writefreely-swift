@@ -108,3 +108,19 @@ extension WFPost: Decodable {
         }
     }
 }
+
+extension WFPost {
+    static let testPost = WFPost(postId: nil,
+                                 slug: nil,
+                                 appearance: "norm",
+                                 language: "",
+                                 rtl: false,
+                                 createdDate: nil,
+                                 updatedDate: nil,
+                                 title: "My Test Post",
+                                 body: "This is a test post.",
+                                 tags: [],
+                                 views: nil,
+                                 collectionAlias: nil
+    )
+}
