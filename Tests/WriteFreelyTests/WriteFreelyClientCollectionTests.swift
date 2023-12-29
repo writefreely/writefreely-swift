@@ -60,7 +60,7 @@ final class WriteFreelyClientCollectionTests: XCTestCase {
     }
     
     func testCreateCollection_WithInvalidCollectionData_ReturnsBadRequestError() {
-        guard let _ = try? session.setData(resource: "error_collection_400", fileExt: "json", for: self) else {
+        guard let _ = try? session.setData(resource: "bad_request_400", fileExt: "json", for: self) else {
             XCTFail("Error opening test resource file")
             return
         }
@@ -105,7 +105,7 @@ final class WriteFreelyClientCollectionTests: XCTestCase {
     }
     
     func testGetCollection_WithInvalidCollectionData_ReturnsInvalidDataError() {
-        guard let _ = try? session.setData(resource: "error_collection_400", fileExt: "json", for: self) else {
+        guard let _ = try? session.setData(resource: "bad_request_400", fileExt: "json", for: self) else {
             XCTFail("Error opening test resource file")
             return
         }
