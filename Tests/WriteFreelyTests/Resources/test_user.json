@@ -1,0 +1,11 @@
+{
+  "code": 200,
+  "data": {
+    "access_token": "00000000-0000-0000-0000-000000000000",
+    "user": {
+      "username": "matt",
+      "email": "matt@example.com",
+      "created": "2015-02-03T02:41:19Z"
+    }
+  }
+}
