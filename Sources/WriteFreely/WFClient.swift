@@ -871,7 +871,7 @@ public class WFClient {
     /// - Parameters:
     ///   - token: The access token for the user to fetch.
     ///   - completion: A handler for the `Data` object returned on success, or `Error` on failure.
-    public func getUserData(token: String? = nil, completion: @escaping (Result<Data, Error>) -> Void) {
+    public func getUserData(token: String? = nil, completion: @escaping (Result<WFUser, Error>) -> Void) {
         if token == nil && user == nil {
             completion(.failure(WFError.couldNotComplete))
             return
@@ -891,10 +891,17 @@ public class WFClient {
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue(tokenToVerify, forHTTPHeaderField: "Authorization")
 
-        get(with: request) { result in
+        get(with: request) { [weak self] result in
+            guard let self = self else { return }
+
             switch result {
             case .success(let data):
-                completion(.success(data))
+                do {
+                    let user = try self.decoder.decode(WFUser.self, from: data)
+                    completion(.success(user))
+                } catch {
+                    completion(.failure(error))
+                }
             case .failure(let error):
                 completion(.failure(error))
             }
