@@ -1,0 +1,25 @@
+{
+  "code": 200,
+  "data": [
+    {
+      "alias": "matt",
+      "title": "Matt",
+      "description": "My great blog!",
+      "style_sheet": "",
+      "public": true,
+      "views": 46,
+      "email": "matt-7e7euebput9t5jr3v4csgferutf@writeas.com",
+      "url": "https://write.as/matt/"
+    },
+    {
+      "alias": "new-blog",
+      "title": "Test Blog",
+      "description": "Another great blog!",
+      "style_sheet": "",
+      "public": false,
+      "views": 0,
+      "email": "new-blog-wjn6epspzjqankz41mlfvz@writeas.com",
+      "url": "https://write.as/new-blog/"
+    }
+  ]
+}
